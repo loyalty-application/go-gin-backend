@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/cs301-itsa/project-2022-23t2-project-2022-23t2-g1-t6/controllers"
+	"github.com/cs301-itsa/project-2022-23t2-project-2022-23t2-g1-t6/initializers"
 	"github.com/gin-gonic/gin"
-	"github.com/ride-kaki/fake-rideshare-api/controllers"
-	"github.com/ride-kaki/fake-rideshare-api/initializers"
 )
 
 func init() {

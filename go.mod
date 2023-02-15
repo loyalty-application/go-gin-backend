@@ -1,4 +1,4 @@
-module github.com/ride-kaki/fake-rideshare-api
+module github.com/cs301-itsa/project-2022-23t2-project-2022-23t2-g1-t6
 
 go 1.18
 
@@ -26,6 +26,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/radovskyb/watcher v1.0.7 // indirect
+	github.com/ride-kaki/fake-rideshare-api v0.0.0-20230214170223-68180fb9e184
 	github.com/ugorji/go/codec v1.2.9 // indirect
 	golang.org/x/crypto v0.6.0 // indirect
 	golang.org/x/net v0.6.0 // indirect
