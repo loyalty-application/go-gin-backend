@@ -2,13 +2,11 @@ FROM golang:latest
 
 WORKDIR /app
 
-COPY go.mod ./
-COPY go.sum ./
+COPY . .
 
 RUN go mod download
-RUN go install github.com/cosmtrek/air@latest
 
-COPY . ./
+RUN go install github.com/cosmtrek/air@latest
 
 EXPOSE 8080
 

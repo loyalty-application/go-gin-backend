@@ -15,6 +15,11 @@ func NewRouter() *gin.Engine {
 	health := new(controllers.HealthController)
 	router.GET("/health", health.Status)
 
+	// auth controller
+	auth := new(controllers.AuthController)
+	router.GET("/auth", auth.UserLogin)
+
+	// middleware
 	// use auth middleware
 	router.Use(middlewares.AuthMiddleware())
 
