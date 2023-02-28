@@ -23,3 +23,6 @@ go.work
 
 # Environment file
 .env
+
+# Air builds
+tmp
