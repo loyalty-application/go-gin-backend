@@ -8,7 +8,8 @@ import (
 
 type HealthController struct{}
 
-// @Description health check endpoint
+// @Summary Health Check
+// @Description Health Check Endpoint that doesn't require authentication
 // @Success 200 {string} string	"Success"
 // @Failure 404 {string} string "Not Found"
 // @Router /health [get]

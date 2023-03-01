@@ -55,6 +55,13 @@ func (a AuthController) Login(c *gin.Context) {
 
 }
 
+// @Summary     Registration
+// @Description Registration endpoint for user new users to register for an account
+// @Accept      application/json
+// @Produce     application/json
+// @Success     200 {string} string	"OK"
+// @Failure     400 {string} string "Bad Request"
+// @Router      /auth/register [post]
 func (a AuthController) Register(c *gin.Context) {
 
 	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
