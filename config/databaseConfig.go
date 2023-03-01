@@ -11,9 +11,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var Client *mongo.Client
+var Client *mongo.Client = DBinstance()
 
-func InitDatabase() {
+func DBinstance() (client *mongo.Client) {
 
 	mongoUsername := os.Getenv("MONGO_INITDB_ROOT_USERNAME")
 	mongoPassword := os.Getenv("MONGO_INITDB_ROOT_PASSWORD")
@@ -37,7 +37,7 @@ func InitDatabase() {
 	}
 	fmt.Println("Connected to MongoDB!")
 
-	Client = client
+	return client
 }
 
 func OpenCollection(client *mongo.Client, collectionName string) *mongo.Collection {

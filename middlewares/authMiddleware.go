@@ -25,8 +25,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		authService := new(services.AuthService)
-		tokenValid := authService.ValidateToken(tokenString)
+		tokenValid := services.ValidateToken(tokenString)
 
 		if !tokenValid {
 			c.String(http.StatusInternalServerError, "Invalid Token")

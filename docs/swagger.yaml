@@ -1,0 +1,16 @@
+info:
+  contact: {}
+paths:
+  /health:
+    get:
+      description: health check endpoint
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+swagger: "2.0"
