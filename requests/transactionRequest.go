@@ -1,4 +1,4 @@
-package models
+package requests
 
 type TransactionRowList struct {
 	Transactions []TransactionRow `json:"transactions"`

@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/loyalty-application/go-gin-backend/models"
+	"github.com/loyalty-application/go-gin-backend/requests"
 )
 
 type TransactionController struct{}
@@ -15,7 +15,7 @@ func (t TransactionController) GetTransaction(c *gin.Context) {
 
 func (t TransactionController) CreateTransaction(c *gin.Context) {
 	// bind json to model
-	data := new(models.TransactionRowList)
+	data := new(requests.TransactionRowList)
 	err := c.BindJSON(data)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Bad Request,"+err.Error())

@@ -2,14 +2,13 @@ package main
 
 import (
 	"github.com/loyalty-application/go-gin-backend/config"
-	"github.com/loyalty-application/go-gin-backend/db"
-	"github.com/loyalty-application/go-gin-backend/server"
+	"github.com/loyalty-application/go-gin-backend/routes"
 )
 
 func main() {
 
-	config.Init()
-	db.Init()
-	server.Init()
+	config.InitEnvironment()
+	config.InitDatabase()
+	routes.InitRoutes()
 
 }

@@ -9,7 +9,7 @@ import (
 
 type AuthController struct{}
 
-func (a AuthController) UserLogin(c *gin.Context) {
+func (a AuthController) Login(c *gin.Context) {
 
 	auth := new(services.AuthService)
 	token := auth.GenerateToken()
@@ -17,5 +17,9 @@ func (a AuthController) UserLogin(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"token": token,
 	})
+
+}
+
+func (a AuthController) SignUp(c *gin.Context) {
 
 }

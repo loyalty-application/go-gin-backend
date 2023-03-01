@@ -64,3 +64,7 @@ func (a AuthService) ValidateToken(tokenString string) bool {
 	return false
 
 }
+
+func (a AuthService) SignUp() {
+
+}

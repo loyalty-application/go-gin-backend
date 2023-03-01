@@ -6,7 +6,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func Init() {
+func InitEnvironment() {
 	// loads into ENV
 	// to retrieve a environment variable, use os.Getenv("ENV_VARIABLE_NAME")
 	err := godotenv.Load()
