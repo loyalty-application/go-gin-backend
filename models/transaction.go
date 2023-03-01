@@ -7,7 +7,7 @@ type TransactionList struct {
 
 type TransactionRow struct {
 	Id              int     `json:"id"`
-	TransactionId   string  `json:"transaction_id"`
+	TransactionId   string  `json:"transaction_id" bson:"_id"`
 	Merchant        string  `json:"merchant"`
 	MCC             string  `json:"mcc"`
 	Currency        string  `json:"currency"`

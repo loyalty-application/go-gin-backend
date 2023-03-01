@@ -46,7 +46,7 @@ func InitRoutes() {
 	transactionGroup.Use(middlewares.AuthMiddleware())
 
 	transactionGroup.GET("/:userId", transaction.GetTransactions)
-	transactionGroup.POST("/:id", transaction.PostTransactions)
+	transactionGroup.POST("/:userId", transaction.PostTransactions)
 
 	router.Run(":" + PORT)
 }

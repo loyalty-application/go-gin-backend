@@ -1,34 +1,50 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/loyalty-application/go-gin-backend/collections"
 	"github.com/loyalty-application/go-gin-backend/models"
 )
 
 type TransactionController struct{}
 
 func (t TransactionController) GetTransactions(c *gin.Context) {
-	// get path param
 	userId := c.Param("userId")
 	if userId == "" {
-		c.JSON(http.StatusBadRequest, "Invalid User Id")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid User Id"})
+		return
 	}
 
-	// retrieve user's transactions from database
+	result, err := collections.RetrieveAllTransactions(userId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-	c.String(http.StatusOK, "Working!")
+	c.JSON(http.StatusOK, result)
+
 }
 
 func (t TransactionController) PostTransactions(c *gin.Context) {
-	// bind json to model
-	data := new(models.TransactionList)
-	err := c.BindJSON(data)
-	if err != nil {
-		c.String(http.StatusBadRequest, "Bad Request")
+	userId := c.Param("userId")
+	if userId == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid User Id"})
 		return
 	}
-	//result, err := .InsertMany(context.TODO(), docs)
+
+	data := new(models.TransactionList)
+	data.UserId = userId
+	err := c.BindJSON(data)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Transactions"})
+		return
+	}
+
+	result, err := collections.CreateTransactions(*data)
+	fmt.Println(result)
+
 	c.String(http.StatusOK, "Success")
 }

@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var userCollection *mongo.Collection = config.OpenCollection(config.Client, "user")
+var userCollection *mongo.Collection = config.OpenCollection(config.Client, "users")
 
 func RetrieveUser(user models.User) (dbUser models.User, err error) {
 
