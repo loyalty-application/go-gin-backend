@@ -1,7 +1,8 @@
-package requests
+package models
 
-type TransactionRowList struct {
-	Transactions []TransactionRow `json:"transactions"`
+type TransactionList struct {
+	UserId       string        `bson:"_id"`
+	Transactions []interface{} `json:"transactions"`
 }
 
 type TransactionRow struct {

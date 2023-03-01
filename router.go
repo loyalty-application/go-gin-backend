@@ -34,7 +34,7 @@ func InitRoutes() {
 
 	// healthcheck
 	healthGroup := v1.Group("/health")
-	healthGroup.GET("/", health.Status)
+	healthGroup.GET("/", health.GetStatus)
 
 	// authentication
 	authGroup := v1.Group("/auth")
@@ -45,8 +45,8 @@ func InitRoutes() {
 	transactionGroup := v1.Group("/transaction")
 	transactionGroup.Use(middlewares.AuthMiddleware())
 
-	transactionGroup.GET("/", transaction.GetTransaction)
-	transactionGroup.POST("/:id", transaction.CreateTransaction)
+	transactionGroup.GET("/:userId", transaction.GetTransactions)
+	transactionGroup.POST("/:id", transaction.PostTransactions)
 
 	router.Run(":" + PORT)
 }

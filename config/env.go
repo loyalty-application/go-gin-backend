@@ -7,8 +7,7 @@ import (
 )
 
 func InitEnvironment() {
-	// loads into ENV
-	// to retrieve a environment variable, use os.Getenv("ENV_VARIABLE_NAME")
+	// loads environment variables
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")

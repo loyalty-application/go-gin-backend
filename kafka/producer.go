@@ -9,8 +9,9 @@ import (
 )
 
 func main() {
+	server := os.Getenv("KAFKA_BOOTSTRAP_SERVER")
 	topic := "purchases"
-	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "localhost:9092"})
+	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": server})
 
 	if err != nil {
 		fmt.Printf("Failed to create producer: %s", err)

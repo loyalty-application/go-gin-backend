@@ -13,6 +13,6 @@ type HealthController struct{}
 // @Success 200 {string} string	"Success"
 // @Failure 404 {string} string "Not Found"
 // @Router /health [get]
-func (h HealthController) Status(c *gin.Context) {
+func (h HealthController) GetStatus(c *gin.Context) {
 	c.String(http.StatusOK, "Success")
 }

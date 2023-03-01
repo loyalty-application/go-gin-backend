@@ -15,14 +15,14 @@ var Client *mongo.Client = DBinstance()
 
 func DBinstance() (client *mongo.Client) {
 
-	mongoUsername := os.Getenv("MONGO_INITDB_ROOT_USERNAME")
-	mongoPassword := os.Getenv("MONGO_INITDB_ROOT_PASSWORD")
-	mongoHost := os.Getenv("MONGO_HOST")
-	mongoPort := os.Getenv("MONGO_PORT")
+	user := os.Getenv("MONGO_USERNAME")
+	pass := os.Getenv("MONGO_PASSWORD")
+	host := os.Getenv("MONGO_HOST")
+	port := os.Getenv("MONGO_PORT")
 
-	MongoDb := "mongodb://" + mongoUsername + ":" + mongoPassword + "@" + mongoHost + ":" + mongoPort
+	uri := "mongodb://" + user + ":" + pass + "@" + host + ":" + port
 
-	client, err := mongo.NewClient(options.Client().ApplyURI(MongoDb))
+	client, err := mongo.NewClient(options.Client().ApplyURI(uri))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -42,7 +42,7 @@ func DBinstance() (client *mongo.Client) {
 
 func OpenCollection(client *mongo.Client, collectionName string) *mongo.Collection {
 
-	var collection *mongo.Collection = client.Database("cluster0").Collection(collectionName)
+	var collection *mongo.Collection = client.Database("loyalty").Collection(collectionName)
 
 	return collection
 }
