@@ -67,7 +67,7 @@ func (t TransactionController) GetTransactions(c *gin.Context) {
 // @Tags    transaction
 // @Accept  application/json
 // @Produce application/json
-// @Param   Authorization header string true "Bearer eyJhb...yi"
+// @Param   Authorization header string true "Bearer eyJhb..."
 // @Param   user_id path string true "user's id"
 // @Param   request body models.TransactionList true "transactions"
 // @Success 200 {object} []models.Transaction
