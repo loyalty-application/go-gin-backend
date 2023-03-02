@@ -17,7 +17,9 @@ import (
 )
 
 var JWT_SECRET = os.Getenv("JWT_SECRET")
-var userCollection *mongo.Collection = config.OpenCollection(config.Client, "user")
+
+// TODO: create data layer for this function
+var userCollection *mongo.Collection = config.OpenCollection(config.Client, "users")
 
 type CustomClaims struct {
 	Email      string

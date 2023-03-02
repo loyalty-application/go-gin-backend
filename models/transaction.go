@@ -1,19 +1,19 @@
 package models
 
 type TransactionList struct {
-	UserId       string        `bson:"_id"`
-	Transactions []interface{} `json:"transactions"`
+	Transactions []Transaction `json:"transactions" bson:",inline"`
 }
 
-type TransactionRow struct {
-	Id              int     `json:"id"`
-	TransactionId   string  `json:"transaction_id" bson:"_id"`
-	Merchant        string  `json:"merchant"`
-	MCC             string  `json:"mcc"`
-	Currency        string  `json:"currency"`
-	Amount          float32 `json:"amount"`
-	TransactionDate string  `json:"transaction_date"`
-	CardId          string  `json:"card_id"`
-	CardPan         string  `json:"card_pan"`
-	CardType        string  `json:"card_type"`
+type Transaction struct {
+	UserId          string  `json:"-" bson:"user_id"`
+	Id              int     `json:"id" bson:"id"`
+	TransactionId   string  `json:"transaction_id" bson:"transaction_id"`
+	Merchant        string  `json:"merchant" bson:"merchant"`
+	MCC             string  `json:"mcc" bson:"mcc"`
+	Currency        string  `json:"currency" bson:"currency"`
+	Amount          float64 `json:"amount" bson:"amount"`
+	TransactionDate string  `json:"transaction_date" bson:"transaction_date"`
+	CardId          string  `json:"card_id" bson:"card_id"`
+	CardPan         string  `json:"card_pan" bson:"card_pan"`
+	CardType        string  `json:"card_type" bson:"card_type"`
 }
