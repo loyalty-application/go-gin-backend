@@ -17,6 +17,8 @@ func InitRoutes() {
 	health := new(controllers.HealthController)
 	auth := new(controllers.AuthController)
 	transaction := new(controllers.TransactionController)
+
+	// necessary for swagger
 	docs.SwaggerInfo.BasePath = "/api/v1"
 
 	router := gin.New()
@@ -38,7 +40,7 @@ func InitRoutes() {
 
 	// authentication
 	authGroup := v1.Group("/auth")
-	authGroup.POST("/register", auth.Register)
+	authGroup.POST("/registration", auth.Registration)
 	authGroup.POST("/login", auth.Login)
 
 	// transaction

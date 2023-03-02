@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -18,82 +16,82 @@ type AuthController struct{}
 
 var validate = validator.New()
 
+// @Summary Login
+// @Description Users can login to the application and obtain a JWT token through this endpoint
+// @Tags    authentication
+// @Accept  application/json
+// @Produce application/json
+// @Param   request body models.AuthLoginRequest true "Login"
+// @Success 200 {object} models.AuthLoginResponse
+// @Failure 400 {object} models.HTTPError
+// @Router  /auth/login [post]
 func (a AuthController) Login(c *gin.Context) {
 
 	var user models.User
 	var dbUser models.User
 
 	if err := c.BindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Request Body"})
 		return
 	}
 
 	dbUser, err := collections.RetrieveUser(user)
-
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid Login"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Login"})
 		return
 	}
 
-	passwordIsValid, msg := services.VerifyPassword(*user.Password, *dbUser.Password)
+	passwordIsValid := services.VerifyPassword(*user.Password, *dbUser.Password)
 	if passwordIsValid != true {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
+		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Login"})
 		return
 	}
 
-	fmt.Printf("%+v\n", dbUser)
 	token, refreshToken, _ := services.GenerateAllTokens(*dbUser.Email, *dbUser.FirstName, *dbUser.LastName, dbUser.UserID.Hex())
-
 	services.UpdateAllTokens(token, refreshToken, dbUser.UserID.Hex())
 
 	c.JSON(http.StatusOK, dbUser)
 
 }
 
-// @Summary     Registration
-// @Description Registration endpoint for user new users to register for an account
-// @Accept      application/json
-// @Produce     application/json
-// @Success     200 {string} string	"OK"
-// @Failure     400 {string} string "Bad Request"
-// @Router      /auth/register [post]
-func (a AuthController) Register(c *gin.Context) {
+// @Summary Registration
+// @Description Registration endpoint for user new users to register for an account, after registering for an account, the user will be able to login to the system and obtain a JWT Token
+// @Tags    authentication
+// @Accept  application/json
+// @Produce application/json
+// @Param request body models.AuthRegistrationRequest true "Registration"
+// @Success 200 {object} models.AuthRegistrationResponse
+// @Failure 400 {object} models.HTTPError
+// @Failure 500 {object} models.HTTPError
+// @Router  /auth/registration [post]
+func (a AuthController) Registration(c *gin.Context) {
 	var user models.User
 
 	if err := c.BindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Registration Request"})
 		return
 	}
 
 	validationErr := validate.Struct(user)
 	if validationErr != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": validationErr.Error()})
+		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Registration Request"})
 		return
 	}
 
 	count, err := collections.CountUserEmail(*user.Email)
-	if err != nil {
-		log.Panic(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "error occured while checking for the email"})
+	if err != nil || count > 0 {
+		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Email already exists"})
 		return
 	}
 
 	count, err = collections.CountUserPhone(*user.Phone)
-	if err != nil {
-		log.Panic(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "error occured while checking for the phone number"})
+	if err != nil || count > 0 {
+		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Phone number already exists"})
 		return
 	}
 
-	// hash password
 	password := services.HashPassword(*user.Password)
 	user.Password = &password
-
-	if count > 0 {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "this email or phone number already exists"})
-		return
-	}
-
 	user.CreatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	user.UpdatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 
@@ -104,14 +102,13 @@ func (a AuthController) Register(c *gin.Context) {
 	user.Token = &token
 	user.RefreshToken = &refreshToken
 
-	insertRes, insertErr := collections.CreateUser(user)
-
-	if insertErr != nil {
-		msg := fmt.Sprintf("User item was not created")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
+	result, err := collections.CreateUser(user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.HTTPError{http.StatusBadRequest, "User was not created"})
 		return
 	}
 
-	c.JSON(http.StatusOK, insertRes)
+	// TODO: change to proper request instead of mongodb's successful insertion format
+	c.JSON(http.StatusOK, result)
 
 }
