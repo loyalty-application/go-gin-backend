@@ -41,9 +41,10 @@ func (a AuthController) Login(c *gin.Context) {
 		return
 	}
 
-	token, refreshToken, _ := services.GenerateAllTokens(*dbUser.Email, *dbUser.First_name, *dbUser.Last_name, dbUser.User_id)
+	fmt.Printf("%+v\n", dbUser)
+	token, refreshToken, _ := services.GenerateAllTokens(*dbUser.Email, *dbUser.FirstName, *dbUser.LastName, dbUser.UserID.Hex())
 
-	services.UpdateAllTokens(token, refreshToken, dbUser.User_id)
+	services.UpdateAllTokens(token, refreshToken, dbUser.UserID.Hex())
 
 	c.JSON(http.StatusOK, dbUser)
 
@@ -93,15 +94,15 @@ func (a AuthController) Register(c *gin.Context) {
 		return
 	}
 
-	user.ID = primitive.NewObjectID()
-	user.User_id = user.ID.Hex()
-	user.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-	user.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	user.CreatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	user.UpdatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 
 	// generate token for user
-	token, refreshToken, _ := services.GenerateAllTokens(*user.Email, *user.First_name, *user.Last_name, user.User_id)
+	user.UserID = primitive.NewObjectID()
+	token, refreshToken, _ := services.GenerateAllTokens(*user.Email, *user.FirstName, *user.LastName, user.UserID.Hex())
+
 	user.Token = &token
-	user.Refresh_token = &refreshToken
+	user.RefreshToken = &refreshToken
 
 	insertRes, insertErr := collections.CreateUser(user)
 
