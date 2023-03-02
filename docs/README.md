@@ -9,7 +9,6 @@ The project consists of the following folders:
 - `/middlewares` Middleware for the REST API
 - `/controllers` Controller layer, only logic for controller should be here, other things belong in other layers
 - `/config` Configuration files to load things like env variables and db connection
-- `/docker` Docker related files such as the Dockerfile for the prod and dev of this microservice
 - `/kafka` Kafka Producers
 - `/docs` Swagger API documentation and other docs related to this microservice
 
@@ -54,4 +53,10 @@ git merge development
 Do note that before you do this, you should check with others working on this branch to ensure that the updates they've merged into `development` are tested and ready to be merged into `main`
 
 ## Docker
-Take note that this repo does not contain the `docker-compose.yml` file required to start the project.
+The project contains two seperate Dockerfile(s), namely `Dockerfile` and `Dockerfile.dev`.
+The `Dockerfile` is for production use while the `Dockerfile.dev` is for development use.
+
+In the development phase, we make use of `air` to monitor the files for changes in order to perform live reloading.
+After each live reload, it also makes use of the `swag` command to generate new `swagger` documentation based on the annotations written.
+
+You will not need to handle any of these manually as the scripts have already been written.
