@@ -12,7 +12,7 @@ import (
 )
 
 func InitRoutes() {
-	PORT := os.Getenv("SERVER_PORT")
+	PORT := os.Getenv("PORT")
 
 	health := new(controllers.HealthController)
 	auth := new(controllers.AuthController)
