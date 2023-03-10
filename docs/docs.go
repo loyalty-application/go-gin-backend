@@ -202,7 +202,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Bearer eyJhb...yi",
+                        "description": "Bearer eyJhb...",
                         "name": "Authorization",
                         "in": "header",
                         "required": true
