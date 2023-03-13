@@ -12,7 +12,7 @@ import (
 )
 
 func InitRoutes() {
-	PORT := os.Getenv("PORT")
+	PORT := os.Getenv("SERVER_PORT")
 
 	health := new(controllers.HealthController)
 	auth := new(controllers.AuthController)
@@ -55,11 +55,11 @@ func InitRoutes() {
 	campaignGroup := v1.Group("/campaign")
 	campaignGroup.Use(middlewares.AuthMiddleware())
 
-	campaignGroup.GET("/", campaign.GetCampaigns)
-	//campaignGroup.GET("/:id", campaign.GetCampaignId)
-	//campaignGroup.POST("", campaign.PostCampaign)
-	//campaignGroup.PUT(":id", campaign.UpdateCampaign)
-	//campaignGroup.DELETE(":id", campaign.DeleteCampaign)
+	//campaignGroup.GET("/", campaign.GetCampaigns)
+	campaignGroup.GET("/:campaignId", campaign.GetCampaignId)
+	campaignGroup.POST("/:userId", campaign.PostCampaign)
+	//campaignGroup.PUT("/:campaignId", campaign.UpdateCampaign)
+	//campaignGroup.DELETE("/:campaignId", campaign.DeleteCampaign)
 
 	router.Run(":" + PORT)
 }
