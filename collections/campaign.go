@@ -65,7 +65,7 @@ func CreateCampaign(userId string, campaigns models.CampaignList) (result *mongo
 	return result, err
 }
 
-func UpdateCampaign(campaignId string, updateData bson.M) (result *mongo.UpdateResult, err error) {
+func UpdateCampaign(campaignId string, updateData models.Campaign) (result *mongo.UpdateResult, err error) {
     ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
     defer cancel()
 

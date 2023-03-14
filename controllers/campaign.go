@@ -77,7 +77,7 @@ func (t CampaignController) GetCampaigns(c *gin.Context) {
 	}
 
 	skipInt := pageInt * limitInt
-	result, err := collections.RetrieveAllCampaigns(campaginId, skipInt, limitInt)
+	result, err := collections.RetrieveAllCampaigns(merchantId, skipInt, limitInt)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.HTTPError{http.StatusInternalServerError, "Failed to retrieve campaigns"})
 		return
@@ -121,7 +121,7 @@ func (t CampaignController) PostCampaign(c *gin.Context) {
 // @Produce application/json
 // @Param   Authorization header string true "Bearer eyJhb..."
 // @Param   campaign_id path string true "campaign's id"
-// @Param   body body models.CampaignList true "Campaign object"
+// @Param   body body models.CampaignList true "campaign"
 // @Success 200 {object} models.Campaign
 // @Failure 400 {object} models.HTTPError
 // @Router  /campaign/{campaign_id} [put]
@@ -132,7 +132,7 @@ func (t CampaignController) UpdateCampaign(c *gin.Context) {
 		return
 	}
 
-	data := new(models.CampaignList)
+	data := new(models.Campaign)
 	err := c.BindJSON(data)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Campaign Object" + err.Error()})
@@ -175,5 +175,5 @@ func (t CampaignController) DeleteCampaign(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusNoContent)
+	c.JSON(http.StatusNoContent, err)
 }
