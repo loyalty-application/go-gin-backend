@@ -8,9 +8,29 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
+	"errors"
 )
 
 var campaignCollection *mongo.Collection = config.OpenCollection(config.Client, "campaigns")
+
+
+func RetrieveCampaign(campaignID string) (campaign models.Campaign, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	filter := bson.D{{Key: "campaign_id", Value: campaignID}}
+
+	err = campaignCollection.FindOne(ctx, filter).Decode(&campaign)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return models.Campaign{}, errors.New("campaign not found")
+		}
+		return models.Campaign{}, err
+	}
+
+	return campaign, nil
+}
+
 
 func RetrieveAllCampaigns(campaignId string, skip int64, slice int64) (campaign []models.Campaign, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -43,4 +63,29 @@ func CreateCampaign(userId string, campaigns models.CampaignList) (result *mongo
 
 	result, err = campaignCollection.InsertMany(ctx, t)
 	return result, err
+}
+
+func UpdateCampaign(campaignId string, updateData bson.M) (result *mongo.UpdateResult, err error) {
+    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+    defer cancel()
+
+    filter := bson.D{{Key: "campaign_id", Value: campaignId}}
+    update := bson.D{{Key: "$set", Value: updateData}}
+
+    result, err = campaignCollection.UpdateOne(ctx, filter, update)
+    return result, err
+}
+
+func DeleteCampaign(campaignId string) error {
+    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+    defer cancel()
+
+    filter := bson.D{{Key: "campaign_id", Value: campaignId}}
+
+    _, err := campaignCollection.DeleteOne(ctx, filter)
+    if err != nil {
+        return err
+    }
+
+    return nil
 }
