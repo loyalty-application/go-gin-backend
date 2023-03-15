@@ -22,6 +22,7 @@ func InitRoutes() {
 	// necessary for swagger
 	docs.SwaggerInfo.BasePath = "/api/v1"
 
+	gin.SetMode(os.Getenv("GIN_MODE"))
 	router := gin.New()
 	// logging to stdout
 	router.Use(gin.Logger())

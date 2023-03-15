@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/loyalty-application/go-gin-backend/collections"
 	"github.com/loyalty-application/go-gin-backend/models"
+	"github.com/loyalty-application/go-gin-backend/validators"
 	"go.mongodb.org/mongo-driver/mongo"
 	"net/http"
 	"strconv"
@@ -17,7 +18,7 @@ type CampaignController struct{}
 // @Accept  application/json
 // @Produce application/json
 // @Param   Authorization header string true "Bearer eyJhb..."
-// @Param   campaign_id path string true "capaign's id"
+// @Param   campaign_id path string true "campaign's id"
 // @Success 200 {object} models.Campaign
 // @Failure 400 {object} models.HTTPError
 // @Router  /campaign/{campaign_id} [get]
@@ -37,16 +38,16 @@ func (t CampaignController) GetCampaignId(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-// GetCampaignId @Summary Retrieve Campaigns of a merchant
+// GetCampaigns GetCampaignId @Summary Retrieve Campaigns of a merchant
 // @Description Retrieve Campaigns of a merchant
 // @Tags    campaign
 // @Accept  application/json
 // @Produce application/json
 // @Param   Authorization header string true "Bearer eyJhb..."
-// @Param   campaign_id path string true "capaign's id"
+// @Param   campaign_id path string true "campaign's id"
 // @Param   limit query int false "maximum records per page" minimum(0) default(100)
 // @Param   page query int false "page of records, starts from 0" minimum(0) default(0)
-// @Success 200 {object} []models.Campaigns
+// @Success 200 {object} []models.Campaign
 // @Failure 400 {object} models.HTTPError
 // @Router  /campaign/{campaign_id} [get]
 func (t CampaignController) GetCampaigns(c *gin.Context) {
@@ -86,6 +87,17 @@ func (t CampaignController) GetCampaigns(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// @Summary Create Campaigns for Merchants
+// @Description Create campaigns
+// @Tags    campaign
+// @Accept  application/json
+// @Produce application/json
+// @Param   Authorization header string true "Bearer eyJhb..."
+// @Param   user_id path string true "user's id"
+// @Param   request body models.CampaignList true "campaigns"
+// @Success 200 {object} []models.Campaign
+// @Failure 400 {object} models.HTTPError
+// @Router  /campaign/{user_id} [post]
 func (t CampaignController) PostCampaign(c *gin.Context) {
 	// TODO: should post campaign on merchantId
 	userId := c.Param("userId")
@@ -96,8 +108,13 @@ func (t CampaignController) PostCampaign(c *gin.Context) {
 
 	data := new(models.CampaignList)
 	err := c.BindJSON(data)
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Campaign Object" + err.Error()})
+		return
+	}
+
+	if err := validators.ValidateStartDate(c, data.Campaigns[0].StartDate); err != nil {
 		return
 	}
 
