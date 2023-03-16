@@ -19,6 +19,7 @@ func InitRoutes() {
 	health := new(controllers.HealthController)
 	auth := new(controllers.AuthController)
 	transaction := new(controllers.TransactionController)
+	campaign := new(controllers.CampaignController)
 
 	// necessary for swagger
 	docs.SwaggerInfo.BasePath = "/api/v1"
@@ -53,6 +54,16 @@ func InitRoutes() {
 
 	transactionGroup.GET("/:userId", transaction.GetTransactions)
 	transactionGroup.POST("/:userId", transaction.PostTransactions)
+
+	// Create a campaign
+	campaignGroup := v1.Group("/campaign")
+	campaignGroup.Use(middlewares.AuthMiddleware())
+
+	campaignGroup.GET("/", campaign.GetCampaigns)
+	campaignGroup.GET("/:campaignId", campaign.GetCampaignId)
+	campaignGroup.POST("/:userId", campaign.PostCampaign)
+	campaignGroup.PUT("/:campaignId", campaign.UpdateCampaign)
+	campaignGroup.DELETE("/:campaignId", campaign.DeleteCampaign)
 
 	router.Run(":" + PORT)
 }
