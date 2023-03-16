@@ -2,6 +2,7 @@ package collections
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/loyalty-application/go-gin-backend/config"
@@ -9,6 +10,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readconcern"
+	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 )
 
 var transactionCollection *mongo.Collection = config.OpenCollection(config.Client, "transactions")
@@ -31,7 +34,7 @@ func RetrieveAllTransactions(userId string, skip int64, slice int64) (transactio
 	return transaction, err
 }
 
-func CreateTransactions(userId string, transactions models.TransactionList) (result *mongo.InsertManyResult, err error) {
+func CreateTransactions(userId string, transactions models.TransactionList) (result interface{}, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -42,7 +45,33 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 		t[i] = v
 	}
 
+	// Setting write permissions
+	wc := writeconcern.New(writeconcern.WMajority())
+	txnOpts := options.Transaction().SetWriteConcern(wc)
+
+	// Start new session
+	session, err := config.Client.StartSession()
+	if err != nil {
+		return nil, err
+	}
+	defer session.EndSession(context.Background())
+
+	// Start transaction
+	if err = session.StartTransaction(txnOpts); err != nil {
+		return nil, err
+	}
+
+	// Insert documents
 	result, err = transactionCollection.InsertMany(ctx, t)
+	if err != nil {
+		log.Fatal(err)
+		// Abort session if got error
+		session.AbortTransaction(context.Background())
+	}
+
+	// Commit documents if no error
+	err = session.CommitTransaction(context.Background())
+
 	return result, err
 
 }

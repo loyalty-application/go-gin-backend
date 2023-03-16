@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -75,6 +76,7 @@ func (t TransactionController) GetTransactions(c *gin.Context) {
 // @Router  /transaction/{user_id} [post]
 func (t TransactionController) PostTransactions(c *gin.Context) {
 	userId := c.Param("userId")
+	log.Println("SDhuajkhdfsjkhfs")
 	if userId == "" {
 		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid User Id"})
 		return
