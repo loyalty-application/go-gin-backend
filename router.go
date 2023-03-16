@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -12,7 +14,7 @@ import (
 )
 
 func InitRoutes() {
-	PORT := os.Getenv("PORT")
+	PORT := os.Getenv("SERVER_PORT")
 
 	health := new(controllers.HealthController)
 	auth := new(controllers.AuthController)
@@ -21,6 +23,7 @@ func InitRoutes() {
 	// necessary for swagger
 	docs.SwaggerInfo.BasePath = "/api/v1"
 
+	gin.SetMode(os.Getenv("GIN_MODE"))
 	router := gin.New()
 	// logging to stdout
 	router.Use(gin.Logger())
