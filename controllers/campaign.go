@@ -158,9 +158,10 @@ func (t CampaignController) UpdateCampaign(c *gin.Context) {
 // @Produce application/json
 // @Param   Authorization header string true "Bearer eyJhb..."
 // @Param   campaign_id path string true "campaign's id"
-// @Success 204
+// @Param   body body models.CampaignList true "campaign"
+// @Success 200 {object} models.Campaign
 // @Failure 400 {object} models.HTTPError
-// @Router  /campaign/{campaign_id} [delete]
+// @Router  /campaign/{campaign_id}/delete [put]
 func (t CampaignController) DeleteCampaign(c *gin.Context) {
 	campaignId := c.Param("campaignId")
 	if campaignId == "" {
@@ -168,11 +169,22 @@ func (t CampaignController) DeleteCampaign(c *gin.Context) {
 		return
 	}
 
-	err := collections.DeleteCampaign(campaignId)
+	data := new(models.Campaign)
+	err := c.BindJSON(data)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Campaign"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Campaign Object" + err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusNoContent, err)
+	_, err = collections.DeleteCampaign(campaignId, *data)
+	if err != nil {
+		msg := "Invalid Campaign"
+		if mongo.IsDuplicateKeyError(err) {
+			msg = "campaign_id already exists"
+		}
+		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, msg})
+		return
+	}
+
+	c.JSON(http.StatusOK, "Campaign with campaign ID: "+campaignId+" is deleted")
 }

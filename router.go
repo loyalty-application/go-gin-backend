@@ -60,7 +60,7 @@ func InitRoutes() {
 	campaignGroup.GET("/:campaignId", campaign.GetCampaignId)
 	campaignGroup.POST("/:userId", campaign.PostCampaign)
 	campaignGroup.PUT("/:campaignId", campaign.UpdateCampaign)
-	campaignGroup.DELETE("/:campaignId", campaign.DeleteCampaign)
+	campaignGroup.PUT("/:campaignId/delete", campaign.DeleteCampaign)
 
 	router.Run(":" + PORT)
 }
