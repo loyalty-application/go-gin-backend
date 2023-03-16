@@ -234,8 +234,10 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "delete": {
+            }
+        },
+        "/campaign/{campaign_id}/delete": {
+            "put": {
                 "description": "Delete Campaign based on campaignId",
                 "consumes": [
                     "application/json"
@@ -261,11 +263,23 @@ const docTemplate = `{
                         "name": "campaign_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "campaign",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CampaignList"
+                        }
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Campaign"
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
@@ -586,6 +600,10 @@ const docTemplate = `{
                 "end_date": {
                     "type": "string",
                     "example": "2023-03-03T13:10:23Z"
+                },
+                "is_deleted": {
+                    "type": "boolean",
+                    "example": false
                 },
                 "merchant": {
                     "type": "string",

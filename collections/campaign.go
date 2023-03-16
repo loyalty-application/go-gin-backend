@@ -72,16 +72,13 @@ func UpdateCampaign(campaignId string, updateData models.Campaign) (result *mong
 	return result, err
 }
 
-func DeleteCampaign(campaignId string) error {
+func DeleteCampaign(campaignId string, updateData models.Campaign) (result *mongo.UpdateResult, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	filter := bson.D{{Key: "campaign_id", Value: campaignId}}
+	update := bson.D{{Key: "$set", Value: bson.M{"is_deleted": true}}}
 
-	_, err := campaignCollection.DeleteOne(ctx, filter)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	result, err = campaignCollection.UpdateOne(ctx, filter, update)
+	return result, err
 }

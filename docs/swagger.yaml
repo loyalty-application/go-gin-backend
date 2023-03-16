@@ -78,6 +78,9 @@ definitions:
       end_date:
         example: "2023-03-03T13:10:23Z"
         type: string
+      is_deleted:
+        example: false
+        type: boolean
       merchant:
         example: 7-11
         type: string
@@ -230,33 +233,6 @@ paths:
       tags:
       - campaign
   /campaign/{campaign_id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete Campaign based on campaignId
-      parameters:
-      - description: Bearer eyJhb...
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      - description: campaign's id
-        in: path
-        name: campaign_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.HTTPError'
-      summary: Delete Campaign based on campaignId
-      tags:
-      - campaign
     get:
       consumes:
       - application/json
@@ -319,6 +295,42 @@ paths:
           schema:
             $ref: '#/definitions/models.HTTPError'
       summary: Update Campaign based on campaignId
+      tags:
+      - campaign
+  /campaign/{campaign_id}/delete:
+    put:
+      consumes:
+      - application/json
+      description: Delete Campaign based on campaignId
+      parameters:
+      - description: Bearer eyJhb...
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: campaign's id
+        in: path
+        name: campaign_id
+        required: true
+        type: string
+      - description: campaign
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.CampaignList'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Campaign'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.HTTPError'
+      summary: Delete Campaign based on campaignId
       tags:
       - campaign
   /campaign/{user_id}:
