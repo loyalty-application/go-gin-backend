@@ -2,7 +2,6 @@ package collections
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -11,14 +10,12 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readconcern"
 	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 )
 
 var transactionCollection *mongo.Collection = config.OpenCollection(config.Client, "transactions")
 
 func RetrieveAllTransactions(userId string, skip int64, slice int64) (transaction []models.Transaction, err error) {
-	log.Println("Testing Retrieve")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -37,9 +34,7 @@ func RetrieveAllTransactions(userId string, skip int64, slice int64) (transactio
 }
 
 func CreateTransactions(userId string, transactions models.TransactionList) (result interface{}, err error) {
-	fmt.Println("Tesadhjskfdafj")
-	log.Println("Tshjsfsh")
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	_, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	// convert from slice of struct to slice of interface
@@ -64,13 +59,17 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 	if err = session.StartTransaction(txnOpts); err != nil {
 		return nil, err
 	}
+	log.Println("Transaction Start without errors")
 
-	// Insert documents
-	result, err = transactionCollection.InsertMany(ctx, t)
+	// Insert documents in the current session
+	result, err = transactionCollection.InsertMany(mongo.NewSessionContext(context.Background(),session), t)
+	defer cancel()
+
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Insert Many Error = ", err.Error())
 		// Abort session if got error
 		session.AbortTransaction(context.Background())
+		log.Println("Aborted Transaction")
 		return result, err
 	}
 

@@ -1,10 +1,7 @@
 package controllers
 
 import (
-	"fmt"
-	"log"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -28,9 +25,6 @@ type TransactionController struct{}
 // @Failure 400 {object} models.HTTPError
 // @Router  /transaction/{user_id} [get]
 func (t TransactionController) GetTransactions(c *gin.Context) {
-	fmt.Println("Print Test")
-	log.Println("Log Test")
-	os.Stdout.Sync()
 	userId := c.Param("userId")
 	if userId == "" {
 		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid User Id"})
@@ -81,8 +75,6 @@ func (t TransactionController) GetTransactions(c *gin.Context) {
 // @Router  /transaction/{user_id} [post]
 func (t TransactionController) PostTransactions(c *gin.Context) {
 	userId := c.Param("userId")
-	fmt.Printf("SDhuajkhdfsjkhfs")
-	log.Println("sahdgas")
 	if userId == "" {
 		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid User Id"})
 		return
