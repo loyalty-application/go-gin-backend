@@ -2,6 +2,7 @@ package collections
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -17,6 +18,7 @@ import (
 var transactionCollection *mongo.Collection = config.OpenCollection(config.Client, "transactions")
 
 func RetrieveAllTransactions(userId string, skip int64, slice int64) (transaction []models.Transaction, err error) {
+	log.Println("Testing Retrieve")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -35,6 +37,8 @@ func RetrieveAllTransactions(userId string, skip int64, slice int64) (transactio
 }
 
 func CreateTransactions(userId string, transactions models.TransactionList) (result interface{}, err error) {
+	fmt.Println("Tesadhjskfdafj")
+	log.Println("Tshjsfsh")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -67,6 +71,7 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 		log.Fatal(err)
 		// Abort session if got error
 		session.AbortTransaction(context.Background())
+		return result, err
 	}
 
 	// Commit documents if no error

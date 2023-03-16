@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -15,6 +14,7 @@ import (
 
 func InitRoutes() {
 	PORT := os.Getenv("SERVER_PORT")
+	gin.SetMode(os.Getenv("GIN_MODE"))
 
 	health := new(controllers.HealthController)
 	auth := new(controllers.AuthController)
@@ -23,10 +23,11 @@ func InitRoutes() {
 	// necessary for swagger
 	docs.SwaggerInfo.BasePath = "/api/v1"
 
-	gin.SetMode(os.Getenv("GIN_MODE"))
-	router := gin.New()
+	router := gin.Default()
 	// logging to stdout
 	router.Use(gin.Logger())
+	log.Println("GIN_MODE = ", os.Getenv("GIN_MODE"))
+
 	// recover from panics and respond with internal server error
 	router.Use(gin.Recovery())
 
