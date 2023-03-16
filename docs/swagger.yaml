@@ -65,6 +65,33 @@ definitions:
         example: 6400a...
         type: string
     type: object
+  models.Campaign:
+    properties:
+      campaign_id:
+        example: cmp00001
+        type: string
+      card_type:
+        example: super_miles_card
+        type: string
+      description:
+        type: string
+      end_date:
+        example: "2023-03-03T13:10:23Z"
+        type: string
+      merchant:
+        example: 7-11
+        type: string
+      start_date:
+        example: "2023-03-02T13:10:23Z"
+        type: string
+    type: object
+  models.CampaignList:
+    properties:
+      campaigns:
+        items:
+          $ref: '#/definitions/models.Campaign'
+        type: array
+    type: object
   models.HTTPError:
     properties:
       code:
@@ -177,6 +204,161 @@ paths:
       summary: Registration
       tags:
       - authentication
+  /campaign:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all campaigns, sorted by start date
+      parameters:
+      - description: Bearer eyJhb...
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CampaignList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.HTTPError'
+      summary: Retrieve all Campaigns
+      tags:
+      - campaign
+  /campaign/{campaign_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Campaign based on campaignId
+      parameters:
+      - description: Bearer eyJhb...
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: campaign's id
+        in: path
+        name: campaign_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.HTTPError'
+      summary: Delete Campaign based on campaignId
+      tags:
+      - campaign
+    get:
+      consumes:
+      - application/json
+      description: Retrieve Campaign based on campaignId
+      parameters:
+      - description: Bearer eyJhb...
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: campaign's id
+        in: path
+        name: campaign_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Campaign'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.HTTPError'
+      summary: Retrieve Campaign based on campaignId
+      tags:
+      - campaign
+    put:
+      consumes:
+      - application/json
+      description: Update Campaign based on campaignId
+      parameters:
+      - description: Bearer eyJhb...
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: campaign's id
+        in: path
+        name: campaign_id
+        required: true
+        type: string
+      - description: campaign
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.CampaignList'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Campaign'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.HTTPError'
+      summary: Update Campaign based on campaignId
+      tags:
+      - campaign
+  /campaign/{user_id}:
+    post:
+      consumes:
+      - application/json
+      description: Create campaigns
+      parameters:
+      - description: Bearer eyJhb...
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: user's id
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: campaigns
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CampaignList'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Campaign'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.HTTPError'
+      summary: Create Campaigns for Merchants
+      tags:
+      - campaign
   /health:
     get:
       description: Health Check Endpoint that doesn't require authentication
