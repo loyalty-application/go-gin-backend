@@ -15,7 +15,12 @@ import (
 
 var transactionCollection *mongo.Collection = config.OpenCollection(config.Client, "transactions")
 
-func RetrieveAllTransactions(userId string, skip int64, slice int64) (transaction []models.Transaction, err error) {
+func RetrieveAllTransactions(skip int64, slice int64) (transaction []models.Transaction, err error) {
+
+	return nil, nil
+}
+
+func RetrieveAllTransactionsForUser(userId string, skip int64, slice int64) (transaction []models.Transaction, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -69,12 +74,13 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 		log.Println("Insert Many Error = ", err.Error())
 		// Abort session if got error
 		session.AbortTransaction(context.Background())
-		log.Println("Aborted Transaction")
+		// log.Println("Aborted Transaction")
 		return result, err
 	}
 
 	// Commit documents if no error
 	err = session.CommitTransaction(context.Background())
+	log.Println("Test")
 
 	return result, err
 

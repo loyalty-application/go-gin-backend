@@ -52,7 +52,8 @@ func InitRoutes() {
 	transactionGroup := v1.Group("/transaction")
 	transactionGroup.Use(middlewares.AuthMiddleware())
 
-	transactionGroup.GET("/:userId", transaction.GetTransactions)
+	transactionGroup.GET("/", transaction.GetAllTransactions)
+	transactionGroup.GET("/:userId", transaction.GetTransactionsForUser)
 	transactionGroup.POST("/:userId", transaction.PostTransactions)
 
 	// Create a campaign

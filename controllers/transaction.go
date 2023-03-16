@@ -12,6 +12,49 @@ import (
 
 type TransactionController struct{}
 
+// @Summary Retrieve Transacations of all Users
+// @Description Retrieve all transaction records
+// @Tags    transaction
+// @Accept  application/json
+// @Produce application/json
+// @Param   Authorization header string true "Bearer eyJhb..."
+// @Param   limit query int false "maximum records per page" minimum(0) default(100)
+// @Param   page query int false "page of records, starts from 0" minimum(0) default(0)
+// @Success 200 {object} []models.Transaction
+// @Failure 400 {object} models.HTTPError
+// @Router  /transaction/ [get]
+func (t TransactionController) GetAllTransactions(c *gin.Context) {
+
+	// required
+	limit := c.Query("limit")
+	if limit == "" {
+		limit = "100"
+	}
+
+	// optional
+	page := c.Query("page")
+	if page == "" {
+		page = "0"
+	}
+
+	pageInt, err := strconv.ParseInt(page, 10, 64)
+	limitInt, err := strconv.ParseInt(limit, 10, 64)
+
+	if pageInt < 0 || limitInt <= 0 {
+		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Param page should be >= 0 and limit should be > 0 "})
+		return
+	}
+
+	skipInt := pageInt * limitInt
+	result, err := collections.RetrieveAllTransactions(skipInt, limitInt)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.HTTPError{http.StatusInternalServerError, "Failed to retrieve transactions"})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
 // @Summary Retrieve Transactions of User
 // @Description Retrieve transaction records of a user
 // @Tags    transaction
@@ -24,7 +67,7 @@ type TransactionController struct{}
 // @Success 200 {object} []models.Transaction
 // @Failure 400 {object} models.HTTPError
 // @Router  /transaction/{user_id} [get]
-func (t TransactionController) GetTransactions(c *gin.Context) {
+func (t TransactionController) GetTransactionsForUser(c *gin.Context) {
 	userId := c.Param("userId")
 	if userId == "" {
 		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid User Id"})
@@ -52,7 +95,7 @@ func (t TransactionController) GetTransactions(c *gin.Context) {
 	}
 
 	skipInt := pageInt * limitInt
-	result, err := collections.RetrieveAllTransactions(userId, skipInt, limitInt)
+	result, err := collections.RetrieveAllTransactionsForUser(userId, skipInt, limitInt)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.HTTPError{http.StatusInternalServerError, "Failed to retrieve transactions"})
 		return
@@ -87,7 +130,6 @@ func (t TransactionController) PostTransactions(c *gin.Context) {
 		return
 	}
 
-	// TODO: make this operation atomic https://www.mongodb.com/docs/drivers/go/current/fundamentals/transactions/
 	result, err := collections.CreateTransactions(userId, *data)
 	if err != nil {
 		msg := "Invalid Transactions"
