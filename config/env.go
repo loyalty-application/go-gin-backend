@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+	"os"
 
 	"github.com/joho/godotenv"
 )
@@ -9,7 +10,7 @@ import (
 func InitEnvironment() {
 	// loads environment variables
 	err := godotenv.Load()
-	if err != nil {
+	if err != nil && os.Getenv("GIN_MODE") == "debug" {
 		log.Fatal("Error loading .env file")
 	}
 
