@@ -100,7 +100,7 @@ func (t CampaignController) PostCampaign(c *gin.Context) {
 		return
 	}
 
-	result, err := collections.CreateCampaign(userId, *data)
+	_, err = collections.CreateCampaign(userId, *data)
 	if err != nil {
 		msg := "Invalid Campaign"
 		if mongo.IsDuplicateKeyError(err) {
@@ -110,7 +110,7 @@ func (t CampaignController) PostCampaign(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, "Campaign with campaign ID: "+data.Campaigns[0].CampaignId+" is created")
 }
 
 // @Summary Update Campaign based on campaignId
@@ -138,7 +138,7 @@ func (t CampaignController) UpdateCampaign(c *gin.Context) {
 		return
 	}
 
-	result, err := collections.UpdateCampaign(campaignId, *data)
+	_, err = collections.UpdateCampaign(campaignId, *data)
 	if err != nil {
 		msg := "Invalid Campaign"
 		if mongo.IsDuplicateKeyError(err) {
@@ -148,7 +148,7 @@ func (t CampaignController) UpdateCampaign(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, "Campaign with campaign ID: "+data.CampaignId+" is updated")
 }
 
 // @Summary Delete Campaign based on campaignId
