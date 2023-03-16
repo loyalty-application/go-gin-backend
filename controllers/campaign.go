@@ -133,8 +133,24 @@ func (t CampaignController) UpdateCampaign(c *gin.Context) {
 
 	data := new(models.Campaign)
 	err := c.BindJSON(data)
+	startDate := data.StartDate
+	endDate := data.EndDate
+	cardType := data.CardType
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Campaign Object" + err.Error()})
+		return
+	}
+
+	if err := validators.ValidateStartDate(c, startDate); err != nil {
+		return
+	}
+
+	if err := validators.ValidateEndDate(c, startDate, endDate); err != nil {
+		return
+	}
+
+	if err := validators.ValidateCardType(c, cardType); err != nil {
 		return
 	}
 
