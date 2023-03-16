@@ -56,6 +56,7 @@ func InitRoutes() {
 	campaignGroup := v1.Group("/campaign")
 	campaignGroup.Use(middlewares.AuthMiddleware())
 
+	campaignGroup.GET("/", campaign.GetCampaigns)
 	campaignGroup.GET("/:campaignId", campaign.GetCampaignId)
 	campaignGroup.POST("/:userId", campaign.PostCampaign)
 	campaignGroup.PUT("/:campaignId", campaign.UpdateCampaign)

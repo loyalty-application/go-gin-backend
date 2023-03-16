@@ -101,6 +101,44 @@ const docTemplate = `{
                 }
             }
         },
+        "/campaign": {
+            "get": {
+                "description": "Retrieve all campaigns, sorted by start date",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "campaign"
+                ],
+                "summary": "Retrieve all Campaigns",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer eyJhb...",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.CampaignList"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/campaign/{campaign_id}": {
             "get": {
                 "description": "Retrieve Campaign based on campaignId",
@@ -156,6 +194,7 @@ const docTemplate = `{
                 "tags": [
                     "campaign"
                 ],
+                "summary": "Update Campaign based on campaignId",
                 "parameters": [
                     {
                         "type": "string",
@@ -207,6 +246,7 @@ const docTemplate = `{
                 "tags": [
                     "campaign"
                 ],
+                "summary": "Delete Campaign based on campaignId",
                 "parameters": [
                     {
                         "type": "string",

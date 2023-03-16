@@ -204,6 +204,31 @@ paths:
       summary: Registration
       tags:
       - authentication
+  /campaign:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all campaigns, sorted by start date
+      parameters:
+      - description: Bearer eyJhb...
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CampaignList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.HTTPError'
+      summary: Retrieve all Campaigns
+      tags:
+      - campaign
   /campaign/{campaign_id}:
     delete:
       consumes:
@@ -229,6 +254,7 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/models.HTTPError'
+      summary: Delete Campaign based on campaignId
       tags:
       - campaign
     get:
@@ -292,6 +318,7 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/models.HTTPError'
+      summary: Update Campaign based on campaignId
       tags:
       - campaign
   /campaign/{user_id}:

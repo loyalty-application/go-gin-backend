@@ -24,22 +24,38 @@ type CampaignController struct{}
 func (t CampaignController) GetCampaignId(c *gin.Context) {
 	campaignId := c.Param("campaignId")
 
-	if campaignId == ":campaignId" {
-		result, err := collections.RetrieveAllCampaigns()
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, models.HTTPError{http.StatusInternalServerError, "Failed to retrieve campaign"})
-			return
-		}
-		c.JSON(http.StatusOK, result)
-	} else {
-		result, err := collections.RetrieveCampaign(campaignId)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, models.HTTPError{http.StatusInternalServerError, "Failed to retrieve campaign on campaignId"})
-			return
-		}
-
-		c.JSON(http.StatusOK, result)
+	if campaignId == "" {
+		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Campaign Id"})
+		return
 	}
+
+	result, err := collections.RetrieveCampaign(campaignId)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.HTTPError{http.StatusInternalServerError, "Failed to retrieve campaign on campaignId"})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
+// @Summary Retrieve all Campaigns
+// @Description Retrieve all campaigns, sorted by start date
+// @Tags    campaign
+// @Accept  application/json
+// @Produce application/json
+// @Param   Authorization header string true "Bearer eyJhb..."
+// @Success 200 {object} models.CampaignList
+// @Failure 400 {object} models.HTTPError
+// @Router  /campaign [get]
+func (t CampaignController) GetCampaigns(c *gin.Context) {
+	result, err := collections.RetrieveAllCampaigns()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.HTTPError{http.StatusInternalServerError, "Failed to retrieve campaign"})
+		return
+	}
+	c.JSON(http.StatusOK, result)
 }
 
 // @Summary Create Campaigns for Merchants
@@ -97,7 +113,7 @@ func (t CampaignController) PostCampaign(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-// UpdateCampaign @Summary Update Campaign based on campaignId
+// @Summary Update Campaign based on campaignId
 // @Description Update Campaign based on campaignId
 // @Tags    campaign
 // @Accept  application/json
@@ -135,7 +151,7 @@ func (t CampaignController) UpdateCampaign(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-// DeleteCampaign @Summary Delete Campaign based on campaignId
+// @Summary Delete Campaign based on campaignId
 // @Description Delete Campaign based on campaignId
 // @Tags    campaign
 // @Accept  application/json
