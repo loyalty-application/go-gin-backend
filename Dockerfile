@@ -2,6 +2,8 @@ FROM golang:1.18-alpine
 
 WORKDIR /app
 
+ENV GIN_MODE=release
+
 COPY go.mod ./
 COPY go.sum ./
 
