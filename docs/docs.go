@@ -103,7 +103,7 @@ const docTemplate = `{
         },
         "/campaign/{campaign_id}": {
             "get": {
-                "description": "Retrieve Campaigns of a merchant",
+                "description": "Retrieve Campaign based on campaignId",
                 "consumes": [
                     "application/json"
                 ],
@@ -113,6 +113,7 @@ const docTemplate = `{
                 "tags": [
                     "campaign"
                 ],
+                "summary": "Retrieve Campaign based on campaignId",
                 "parameters": [
                     {
                         "type": "string",
@@ -127,32 +128,13 @@ const docTemplate = `{
                         "name": "campaign_id",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "minimum": 0,
-                        "type": "integer",
-                        "default": 100,
-                        "description": "maximum records per page",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "minimum": 0,
-                        "type": "integer",
-                        "default": 0,
-                        "description": "page of records, starts from 0",
-                        "name": "page",
-                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Campaign"
-                            }
+                            "$ref": "#/definitions/models.Campaign"
                         }
                     },
                     "400": {

@@ -13,6 +13,7 @@ import (
 
 func InitRoutes() {
 	PORT := os.Getenv("SERVER_PORT")
+	gin.SetMode(os.Getenv("GIN_MODE"))
 
 	health := new(controllers.HealthController)
 	auth := new(controllers.AuthController)
@@ -22,7 +23,6 @@ func InitRoutes() {
 	// necessary for swagger
 	docs.SwaggerInfo.BasePath = "/api/v1"
 
-	gin.SetMode(os.Getenv("GIN_MODE"))
 	router := gin.New()
 	// logging to stdout
 	router.Use(gin.Logger())
@@ -56,7 +56,6 @@ func InitRoutes() {
 	campaignGroup := v1.Group("/campaign")
 	campaignGroup.Use(middlewares.AuthMiddleware())
 
-	campaignGroup.GET("/", campaign.GetCampaigns)
 	campaignGroup.GET("/:campaignId", campaign.GetCampaignId)
 	campaignGroup.POST("/:userId", campaign.PostCampaign)
 	campaignGroup.PUT("/:campaignId", campaign.UpdateCampaign)
