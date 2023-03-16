@@ -241,7 +241,7 @@ paths:
       - application/json
       description: Create transaction records
       parameters:
-      - description: Bearer eyJhb...yi
+      - description: Bearer eyJhb...
         in: header
         name: Authorization
         required: true
