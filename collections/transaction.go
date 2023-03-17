@@ -19,7 +19,7 @@ func RetrieveAllTransactions(skip int64, slice int64) (transaction []models.Tran
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	opts := options.Find().SetSort(bson.D{{"transaction_date", 1}}).SetLimit(slice).SetSkip(skip)
+	opts := options.Find().SetSort(bson.D{{Key: "transaction_date", Value: 1}}).SetLimit(slice).SetSkip(skip)
 
 	cursor, err := transactionCollection.Find(ctx, bson.D{}, opts)
 	if err != nil {
@@ -38,7 +38,7 @@ func RetrieveAllTransactionsForUser(userId string, skip int64, slice int64) (tra
 	defer cancel()
 
 	filter := bson.D{{Key: "user_id", Value: userId}}
-	opts := options.Find().SetSort(bson.D{{"transaction_date", 1}}).SetLimit(slice).SetSkip(skip)
+	opts := options.Find().SetSort(bson.D{{Key: "transaction_date", Value: 1}}).SetLimit(slice).SetSkip(skip)
 
 	cursor, err := transactionCollection.Find(ctx, filter, opts)
 

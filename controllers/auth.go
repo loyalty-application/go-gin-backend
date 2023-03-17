@@ -31,19 +31,19 @@ func (a AuthController) Login(c *gin.Context) {
 	var dbUser models.User
 
 	if err := c.BindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Request Body"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Request Body"})
 		return
 	}
 
 	dbUser, err := collections.RetrieveUser(user)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Login"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Login"})
 		return
 	}
 
 	passwordIsValid := services.VerifyPassword(*user.Password, *dbUser.Password)
 	if passwordIsValid != true {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Login"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Login"})
 		return
 	}
 
@@ -67,25 +67,25 @@ func (a AuthController) Login(c *gin.Context) {
 func (a AuthController) Registration(c *gin.Context) {
 	var user models.User
 	if err := c.BindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Registration Request"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Registration Request"})
 		return
 	}
 
 	validationErr := validate.Struct(user)
 	if validationErr != nil {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Registration Request"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Registration Request"})
 		return
 	}
 
 	count, err := collections.CountUserEmail(*user.Email)
 	if err != nil || count > 0 {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Email already exists"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Email already exists"})
 		return
 	}
 
 	count, err = collections.CountUserPhone(*user.Phone)
 	if err != nil || count > 0 {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Phone number already exists"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Phone number already exists"})
 		return
 	}
 
@@ -103,7 +103,7 @@ func (a AuthController) Registration(c *gin.Context) {
 
 	result, err := collections.CreateUser(user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.HTTPError{http.StatusBadRequest, "User was not created"})
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusBadRequest, Message: "User was not created"})
 		return
 	}
 

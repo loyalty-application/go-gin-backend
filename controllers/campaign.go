@@ -25,14 +25,14 @@ func (t CampaignController) GetCampaignId(c *gin.Context) {
 	campaignId := c.Param("campaignId")
 
 	if campaignId == "" {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Campaign Id"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Campaign Id"})
 		return
 	}
 
 	result, err := collections.RetrieveCampaign(campaignId)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.HTTPError{http.StatusInternalServerError, "Failed to retrieve campaign on campaignId"})
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "Failed to retrieve campaign on campaignId"})
 		return
 	}
 
@@ -52,7 +52,7 @@ func (t CampaignController) GetCampaigns(c *gin.Context) {
 	result, err := collections.RetrieveAllCampaigns()
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.HTTPError{http.StatusInternalServerError, "Failed to retrieve campaign"})
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "Failed to retrieve campaign"})
 		return
 	}
 	c.JSON(http.StatusOK, result)
@@ -73,7 +73,7 @@ func (t CampaignController) PostCampaign(c *gin.Context) {
 	// TODO: should post campaign on merchantId
 	userId := c.Param("userId")
 	if userId == "" {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid User Id"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid User Id"})
 		return
 	}
 
@@ -84,7 +84,7 @@ func (t CampaignController) PostCampaign(c *gin.Context) {
 	cardType := data.Campaigns[0].CardType
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Campaign Object" + err.Error()})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Campaign Object" + err.Error()})
 		return
 	}
 
@@ -106,7 +106,7 @@ func (t CampaignController) PostCampaign(c *gin.Context) {
 		if mongo.IsDuplicateKeyError(err) {
 			msg = "campaign_id already exists"
 		}
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, msg})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: msg})
 		return
 	}
 
@@ -127,14 +127,14 @@ func (t CampaignController) PostCampaign(c *gin.Context) {
 func (t CampaignController) UpdateCampaign(c *gin.Context) {
 	campaignId := c.Param("campaignId")
 	if campaignId == "" {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Campaign Id"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Campaign Id"})
 		return
 	}
 
 	data := new(models.Campaign)
 	err := c.BindJSON(data)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Campaign Object" + err.Error()})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Campaign Object" + err.Error()})
 		return
 	}
 
@@ -144,7 +144,7 @@ func (t CampaignController) UpdateCampaign(c *gin.Context) {
 		if mongo.IsDuplicateKeyError(err) {
 			msg = "campaign_id already exists"
 		}
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, msg})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: msg})
 		return
 	}
 
@@ -164,13 +164,13 @@ func (t CampaignController) UpdateCampaign(c *gin.Context) {
 func (t CampaignController) DeleteCampaign(c *gin.Context) {
 	campaignId := c.Param("campaignId")
 	if campaignId == "" {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Campaign Id"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Campaign Id"})
 		return
 	}
 
 	err := collections.DeleteCampaign(campaignId)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Campaign"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Campaign"})
 		return
 	}
 
