@@ -132,6 +132,9 @@ definitions:
       transaction_id:
         example: txn00001
         type: string
+      user_id:
+        example: 6400a...
+        type: string
     type: object
   models.TransactionList:
     properties:

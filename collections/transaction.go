@@ -16,8 +16,21 @@ import (
 var transactionCollection *mongo.Collection = config.OpenCollection(config.Client, "transactions")
 
 func RetrieveAllTransactions(skip int64, slice int64) (transaction []models.Transaction, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-	return nil, nil
+	opts := options.Find().SetSort(bson.D{{"transaction_date", 1}}).SetLimit(slice).SetSkip(skip)
+
+	cursor, err := transactionCollection.Find(ctx, bson.D{}, opts)
+	if err != nil {
+		panic(err)
+	}
+
+	if err = cursor.All(ctx, &transaction); err != nil {
+		panic(err)
+	}
+
+	return transaction, err
 }
 
 func RetrieveAllTransactionsForUser(userId string, skip int64, slice int64) (transaction []models.Transaction, err error) {
@@ -46,6 +59,7 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 	t := make([]interface{}, len(transactions.Transactions))
 	for i, v := range transactions.Transactions {
 		v.UserId = userId
+		log.Println(v)
 		t[i] = v
 	}
 

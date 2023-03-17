@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -50,6 +51,10 @@ func (t TransactionController) GetAllTransactions(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.HTTPError{http.StatusInternalServerError, "Failed to retrieve transactions"})
 		return
+	}
+	for i, v := range result {
+		log.Println("Index = ", i)
+		log.Println(v.UserId)
 	}
 
 	c.JSON(http.StatusOK, result)
