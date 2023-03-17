@@ -80,8 +80,6 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 
 	// Commit documents if no error
 	err = session.CommitTransaction(context.Background())
-	log.Println("Test")
 
 	return result, err
-
 }
