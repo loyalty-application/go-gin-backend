@@ -2,7 +2,6 @@ package collections
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -11,14 +10,30 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readconcern"
 	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 )
 
 var transactionCollection *mongo.Collection = config.OpenCollection(config.Client, "transactions")
 
-func RetrieveAllTransactions(userId string, skip int64, slice int64) (transaction []models.Transaction, err error) {
-	log.Println("Testing Retrieve")
+func RetrieveAllTransactions(skip int64, slice int64) (transaction []models.Transaction, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	opts := options.Find().SetSort(bson.D{{"transaction_date", 1}}).SetLimit(slice).SetSkip(skip)
+
+	cursor, err := transactionCollection.Find(ctx, bson.D{}, opts)
+	if err != nil {
+		panic(err)
+	}
+
+	if err = cursor.All(ctx, &transaction); err != nil {
+		panic(err)
+	}
+
+	return transaction, err
+}
+
+func RetrieveAllTransactionsForUser(userId string, skip int64, slice int64) (transaction []models.Transaction, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -37,15 +52,14 @@ func RetrieveAllTransactions(userId string, skip int64, slice int64) (transactio
 }
 
 func CreateTransactions(userId string, transactions models.TransactionList) (result interface{}, err error) {
-	fmt.Println("Tesadhjskfdafj")
-	log.Println("Tshjsfsh")
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	_, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	// convert from slice of struct to slice of interface
 	t := make([]interface{}, len(transactions.Transactions))
 	for i, v := range transactions.Transactions {
 		v.UserId = userId
+		log.Println(v)
 		t[i] = v
 	}
 
@@ -64,13 +78,17 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 	if err = session.StartTransaction(txnOpts); err != nil {
 		return nil, err
 	}
+	log.Println("Transaction Start without errors")
 
-	// Insert documents
-	result, err = transactionCollection.InsertMany(ctx, t)
+	// Insert documents in the current session
+	result, err = transactionCollection.InsertMany(mongo.NewSessionContext(context.Background(),session), t)
+	defer cancel()
+
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Insert Many Error = ", err.Error())
 		// Abort session if got error
 		session.AbortTransaction(context.Background())
+		// log.Println("Aborted Transaction")
 		return result, err
 	}
 
@@ -78,5 +96,4 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 	err = session.CommitTransaction(context.Background())
 
 	return result, err
-
 }

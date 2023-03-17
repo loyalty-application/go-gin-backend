@@ -5,7 +5,7 @@ type TransactionList struct {
 }
 
 type Transaction struct {
-	UserId          string  `json:"-" bson:"user_id" example:"6400a..."`
+	UserId          string  `json:"user_id" bson:"user_id" example:"6400a..."`
 	Id              int     `json:"id" bson:"id" example:"1"`
 	TransactionId   string  `json:"transaction_id" bson:"transaction_id" example:"txn00001"`
 	Merchant        string  `json:"merchant" bson:"merchant" example:"7-11"`

@@ -54,11 +54,21 @@ func InitIndexes(client *mongo.Client) {
 	}
 	indexCreated, err := transactionCollection.Indexes().CreateOne(context.Background(), indexModel)
 
+	// campaigns_campaigns_-1 index
+	campaignCollection := OpenCollection(client, "campaigns")
+
+	campaignIndexModel := mongo.IndexModel{
+		Keys:    bson.D{{"campaign_id", -1}},
+		Options: options.Index().SetUnique(true),
+	}
+	
+	campaignIndexCreated, err := campaignCollection.Indexes().CreateOne(context.Background(), campaignIndexModel)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	fmt.Printf("Created Index %s\n", indexCreated)
+	fmt.Printf("Created Campaign Index %s\n", campaignIndexCreated)
 }
 
 func OpenCollection(client *mongo.Client, collectionName string) *mongo.Collection {

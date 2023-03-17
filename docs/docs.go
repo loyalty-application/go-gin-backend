@@ -101,6 +101,238 @@ const docTemplate = `{
                 }
             }
         },
+        "/campaign": {
+            "get": {
+                "description": "Retrieve all campaigns, sorted by start date",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "campaign"
+                ],
+                "summary": "Retrieve all Campaigns",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer eyJhb...",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.CampaignList"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/campaign/{campaign_id}": {
+            "get": {
+                "description": "Retrieve Campaign based on campaignId",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "campaign"
+                ],
+                "summary": "Retrieve Campaign based on campaignId",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer eyJhb...",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "campaign's id",
+                        "name": "campaign_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Campaign"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.HTTPError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update Campaign based on campaignId",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "campaign"
+                ],
+                "summary": "Update Campaign based on campaignId",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer eyJhb...",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "campaign's id",
+                        "name": "campaign_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "campaign",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CampaignList"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Campaign"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.HTTPError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete Campaign based on campaignId",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "campaign"
+                ],
+                "summary": "Delete Campaign based on campaignId",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer eyJhb...",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "campaign's id",
+                        "name": "campaign_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/campaign/{user_id}": {
+            "post": {
+                "description": "Create campaigns",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "campaign"
+                ],
+                "summary": "Create Campaigns for Merchants",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer eyJhb...",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "user's id",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "campaigns",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CampaignList"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Campaign"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "Health Check Endpoint that doesn't require authentication",
@@ -117,6 +349,63 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/transaction/": {
+            "get": {
+                "description": "Retrieve all transaction records",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transaction"
+                ],
+                "summary": "Retrieve Transacations of all Users",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer eyJhb...",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "minimum": 0,
+                        "type": "integer",
+                        "default": 100,
+                        "description": "maximum records per page",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 0,
+                        "type": "integer",
+                        "default": 0,
+                        "description": "page of records, starts from 0",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Transaction"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/models.HTTPError"
                         }
@@ -337,6 +626,45 @@ const docTemplate = `{
                 }
             }
         },
+        "models.Campaign": {
+            "type": "object",
+            "properties": {
+                "campaign_id": {
+                    "type": "string",
+                    "example": "cmp00001"
+                },
+                "card_type": {
+                    "type": "string",
+                    "example": "super_miles_card"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "end_date": {
+                    "type": "string",
+                    "example": "2023-03-03T13:10:23Z"
+                },
+                "merchant": {
+                    "type": "string",
+                    "example": "7-11"
+                },
+                "start_date": {
+                    "type": "string",
+                    "example": "2023-03-02T13:10:23Z"
+                }
+            }
+        },
+        "models.CampaignList": {
+            "type": "object",
+            "properties": {
+                "campaigns": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Campaign"
+                    }
+                }
+            }
+        },
         "models.HTTPError": {
             "type": "object",
             "properties": {
@@ -391,6 +719,10 @@ const docTemplate = `{
                 "transaction_id": {
                     "type": "string",
                     "example": "txn00001"
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "6400a..."
                 }
             }
         },
