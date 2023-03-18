@@ -8,8 +8,8 @@ import (
 	"github.com/loyalty-application/go-gin-backend/controllers"
 	"github.com/loyalty-application/go-gin-backend/docs"
 	"github.com/loyalty-application/go-gin-backend/middlewares"
-	"github.com/swaggo/files"
-	"github.com/swaggo/gin-swagger"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func InitRoutes() {
@@ -41,7 +41,7 @@ func InitRoutes() {
 
 	// healthcheck
 	healthGroup := v1.Group("/health")
-	healthGroup.GET("/", health.GetStatus)
+	healthGroup.GET("", health.GetStatus)
 
 	// authentication
 	authGroup := v1.Group("/auth")
