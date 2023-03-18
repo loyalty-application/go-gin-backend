@@ -49,7 +49,7 @@ func InitIndexes(client *mongo.Client) {
 	transactionCollection := OpenCollection(client, "transactions")
 
 	indexModel := mongo.IndexModel{
-		Keys:    bson.D{{"transaction_id", -1}},
+		Keys:    bson.D{{Key: "transaction_id", Value: -1}},
 		Options: options.Index().SetUnique(true),
 	}
 	indexCreated, err := transactionCollection.Indexes().CreateOne(context.Background(), indexModel)
@@ -58,7 +58,7 @@ func InitIndexes(client *mongo.Client) {
 	campaignCollection := OpenCollection(client, "campaigns")
 
 	campaignIndexModel := mongo.IndexModel{
-		Keys:    bson.D{{"campaign_id", -1}},
+		Keys:    bson.D{{Key: "campaign_id", Value: -1}},
 		Options: options.Index().SetUnique(true),
 	}
 	

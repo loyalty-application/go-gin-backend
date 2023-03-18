@@ -41,14 +41,14 @@ func (t TransactionController) GetAllTransactions(c *gin.Context) {
 	limitInt, err := strconv.ParseInt(limit, 10, 64)
 
 	if pageInt < 0 || limitInt <= 0 {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Param page should be >= 0 and limit should be > 0 "})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Param page should be >= 0 and limit should be > 0 "})
 		return
 	}
 
 	skipInt := pageInt * limitInt
 	result, err := collections.RetrieveAllTransactions(skipInt, limitInt)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.HTTPError{http.StatusInternalServerError, "Failed to retrieve transactions"})
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "Failed to retrieve transactions"})
 		return
 	}
 
@@ -70,7 +70,7 @@ func (t TransactionController) GetAllTransactions(c *gin.Context) {
 func (t TransactionController) GetTransactionsForUser(c *gin.Context) {
 	userId := c.Param("userId")
 	if userId == "" {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid User Id"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid User Id"})
 		return
 	}
 
@@ -90,19 +90,18 @@ func (t TransactionController) GetTransactionsForUser(c *gin.Context) {
 	limitInt, err := strconv.ParseInt(limit, 10, 64)
 
 	if pageInt < 0 || limitInt <= 0 {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Param page should be >= 0 and limit should be > 0 "})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Param page should be >= 0 and limit should be > 0 "})
 		return
 	}
 
 	skipInt := pageInt * limitInt
 	result, err := collections.RetrieveAllTransactionsForUser(userId, skipInt, limitInt)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.HTTPError{http.StatusInternalServerError, "Failed to retrieve transactions"})
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "Failed to retrieve transactions"})
 		return
 	}
 
 	c.JSON(http.StatusOK, result)
-
 }
 
 // @Summary Create Transactions for User
@@ -119,14 +118,14 @@ func (t TransactionController) GetTransactionsForUser(c *gin.Context) {
 func (t TransactionController) PostTransactions(c *gin.Context) {
 	userId := c.Param("userId")
 	if userId == "" {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid User Id"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid User Id"})
 		return
 	}
 
 	data := new(models.TransactionList)
 	err := c.BindJSON(data)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Transaction Object" + err.Error()})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Transaction Object" + err.Error()})
 		return
 	}
 
@@ -136,7 +135,7 @@ func (t TransactionController) PostTransactions(c *gin.Context) {
 		if mongo.IsDuplicateKeyError(err) {
 			msg = "transaction_id already exists"
 		}
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, msg})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: msg})
 		return
 	}
 

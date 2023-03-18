@@ -3,6 +3,7 @@ package collections
 import (
 	"context"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/loyalty-application/go-gin-backend/config"
@@ -19,7 +20,7 @@ func RetrieveAllTransactions(skip int64, slice int64) (transaction []models.Tran
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	opts := options.Find().SetSort(bson.D{{"transaction_date", 1}}).SetLimit(slice).SetSkip(skip)
+	opts := options.Find().SetSort(bson.D{{Key: "transaction_date", Value: 1}}).SetLimit(slice).SetSkip(skip)
 
 	cursor, err := transactionCollection.Find(ctx, bson.D{}, opts)
 	if err != nil {
@@ -38,7 +39,7 @@ func RetrieveAllTransactionsForUser(userId string, skip int64, slice int64) (tra
 	defer cancel()
 
 	filter := bson.D{{Key: "user_id", Value: userId}}
-	opts := options.Find().SetSort(bson.D{{"transaction_date", 1}}).SetLimit(slice).SetSkip(skip)
+	opts := options.Find().SetSort(bson.D{{Key: "transaction_date", Value: 1}}).SetLimit(slice).SetSkip(skip)
 
 	cursor, err := transactionCollection.Find(ctx, filter, opts)
 
@@ -61,6 +62,14 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 		v.UserId = userId
 		log.Println(v)
 		t[i] = v
+
+		// // To test 100k records in 1 transaction
+		// for j, count := 0, 0; j < 100000; j++ {
+		// 	v.UserId = userId
+		// 	v.TransactionId = strconv.Itoa(count)
+		// 	count++
+		// 	t[j] = v
+		// }
 	}
 
 	// Setting write permissions
@@ -81,7 +90,9 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 	log.Println("Transaction Start without errors")
 
 	// Insert documents in the current session
+	log.Println("Before Insert")
 	result, err = transactionCollection.InsertMany(mongo.NewSessionContext(context.Background(),session), t)
+	log.Println("After Insert")
 	defer cancel()
 
 	if err != nil {
