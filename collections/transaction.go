@@ -2,6 +2,7 @@ package collections
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/loyalty-application/go-gin-backend/config"
@@ -9,11 +10,30 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 )
 
 var transactionCollection *mongo.Collection = config.OpenCollection(config.Client, "transactions")
 
-func RetrieveAllTransactions(userId string, skip int64, slice int64) (transaction []models.Transaction, err error) {
+func RetrieveAllTransactions(skip int64, slice int64) (transaction []models.Transaction, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	opts := options.Find().SetSort(bson.D{{"transaction_date", 1}}).SetLimit(slice).SetSkip(skip)
+
+	cursor, err := transactionCollection.Find(ctx, bson.D{}, opts)
+	if err != nil {
+		panic(err)
+	}
+
+	if err = cursor.All(ctx, &transaction); err != nil {
+		panic(err)
+	}
+
+	return transaction, err
+}
+
+func RetrieveAllTransactionsForUser(userId string, skip int64, slice int64) (transaction []models.Transaction, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -31,18 +51,49 @@ func RetrieveAllTransactions(userId string, skip int64, slice int64) (transactio
 	return transaction, err
 }
 
-func CreateTransactions(userId string, transactions models.TransactionList) (result *mongo.InsertManyResult, err error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+func CreateTransactions(userId string, transactions models.TransactionList) (result interface{}, err error) {
+	_, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	// convert from slice of struct to slice of interface
 	t := make([]interface{}, len(transactions.Transactions))
 	for i, v := range transactions.Transactions {
 		v.UserId = userId
+		log.Println(v)
 		t[i] = v
 	}
 
-	result, err = transactionCollection.InsertMany(ctx, t)
-	return result, err
+	// Setting write permissions
+	wc := writeconcern.New(writeconcern.WMajority())
+	txnOpts := options.Transaction().SetWriteConcern(wc)
 
+	// Start new session
+	session, err := config.Client.StartSession()
+	if err != nil {
+		return nil, err
+	}
+	defer session.EndSession(context.Background())
+
+	// Start transaction
+	if err = session.StartTransaction(txnOpts); err != nil {
+		return nil, err
+	}
+	log.Println("Transaction Start without errors")
+
+	// Insert documents in the current session
+	result, err = transactionCollection.InsertMany(mongo.NewSessionContext(context.Background(),session), t)
+	defer cancel()
+
+	if err != nil {
+		log.Println("Insert Many Error = ", err.Error())
+		// Abort session if got error
+		session.AbortTransaction(context.Background())
+		// log.Println("Aborted Transaction")
+		return result, err
+	}
+
+	// Commit documents if no error
+	err = session.CommitTransaction(context.Background())
+
+	return result, err
 }

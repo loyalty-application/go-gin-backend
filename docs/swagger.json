@@ -361,6 +361,63 @@
                 }
             }
         },
+        "/transaction/": {
+            "get": {
+                "description": "Retrieve all transaction records",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transaction"
+                ],
+                "summary": "Retrieve Transacations of all Users",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer eyJhb...",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "minimum": 0,
+                        "type": "integer",
+                        "default": 100,
+                        "description": "maximum records per page",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 0,
+                        "type": "integer",
+                        "default": 0,
+                        "description": "page of records, starts from 0",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Transaction"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/transaction/{user_id}": {
             "get": {
                 "description": "Retrieve transaction records of a user",
@@ -671,6 +728,10 @@
                 "transaction_id": {
                     "type": "string",
                     "example": "txn00001"
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "6400a..."
                 }
             }
         },

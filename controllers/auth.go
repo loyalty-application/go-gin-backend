@@ -66,7 +66,6 @@ func (a AuthController) Login(c *gin.Context) {
 // @Router  /auth/registration [post]
 func (a AuthController) Registration(c *gin.Context) {
 	var user models.User
-
 	if err := c.BindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Registration Request"})
 		return

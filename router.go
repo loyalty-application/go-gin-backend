@@ -1,14 +1,15 @@
 package main
 
 import (
+	"log"
 	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/loyalty-application/go-gin-backend/controllers"
 	"github.com/loyalty-application/go-gin-backend/docs"
 	"github.com/loyalty-application/go-gin-backend/middlewares"
-	"github.com/swaggo/files"
-	"github.com/swaggo/gin-swagger"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func InitRoutes() {
@@ -23,9 +24,11 @@ func InitRoutes() {
 	// necessary for swagger
 	docs.SwaggerInfo.BasePath = "/api/v1"
 
-	router := gin.New()
+	router := gin.Default()
 	// logging to stdout
 	router.Use(gin.Logger())
+	log.Println("GIN_MODE = ", os.Getenv("GIN_MODE"))
+
 	// recover from panics and respond with internal server error
 	router.Use(gin.Recovery())
 
@@ -38,7 +41,7 @@ func InitRoutes() {
 
 	// healthcheck
 	healthGroup := v1.Group("/health")
-	healthGroup.GET("/", health.GetStatus)
+	healthGroup.GET("", health.GetStatus)
 
 	// authentication
 	authGroup := v1.Group("/auth")
@@ -49,7 +52,8 @@ func InitRoutes() {
 	transactionGroup := v1.Group("/transaction")
 	transactionGroup.Use(middlewares.AuthMiddleware())
 
-	transactionGroup.GET("/:userId", transaction.GetTransactions)
+	transactionGroup.GET("/", transaction.GetAllTransactions)
+	transactionGroup.GET("/:userId", transaction.GetTransactionsForUser)
 	transactionGroup.POST("/:userId", transaction.PostTransactions)
 
 	// Create a campaign
