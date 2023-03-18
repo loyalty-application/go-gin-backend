@@ -3,6 +3,7 @@ package collections
 import (
 	"context"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/loyalty-application/go-gin-backend/config"
@@ -61,6 +62,14 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 		v.UserId = userId
 		log.Println(v)
 		t[i] = v
+
+		// // To test 100k records in 1 transaction
+		// for j, count := 0, 0; j < 100000; j++ {
+		// 	v.UserId = userId
+		// 	v.TransactionId = strconv.Itoa(count)
+		// 	count++
+		// 	t[j] = v
+		// }
 	}
 
 	// Setting write permissions
@@ -81,7 +90,9 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 	log.Println("Transaction Start without errors")
 
 	// Insert documents in the current session
+	log.Println("Before Insert")
 	result, err = transactionCollection.InsertMany(mongo.NewSessionContext(context.Background(),session), t)
+	log.Println("After Insert")
 	defer cancel()
 
 	if err != nil {

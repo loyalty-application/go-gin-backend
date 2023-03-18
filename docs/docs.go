@@ -694,7 +694,8 @@ const docTemplate = `{
                     "example": "xyz"
                 },
                 "card_type": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "super_miles_card"
                 },
                 "currency": {
                     "type": "string",
@@ -711,6 +712,10 @@ const docTemplate = `{
                 "merchant": {
                     "type": "string",
                     "example": "7-11"
+                },
+                "points": {
+                    "type": "integer",
+                    "example": 100
                 },
                 "transaction_date": {
                     "type": "string",

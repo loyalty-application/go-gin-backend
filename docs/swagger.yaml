@@ -113,6 +113,7 @@ definitions:
         example: xyz
         type: string
       card_type:
+        example: super_miles_card
         type: string
       currency:
         example: USD
@@ -126,6 +127,9 @@ definitions:
       merchant:
         example: 7-11
         type: string
+      points:
+        example: 100
+        type: integer
       transaction_date:
         example: yyyy-mm-dd hh:mm:ss
         type: string
