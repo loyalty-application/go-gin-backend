@@ -19,13 +19,8 @@ func DBinstance() (client *mongo.Client) {
 	user := os.Getenv("MONGO_USERNAME")
 	pass := os.Getenv("MONGO_PASSWORD")
 	host := os.Getenv("MONGO_HOST")
-	port := os.Getenv("MONGO_PORT")
+	conn := fmt.Sprintf("mongodb+srv://%s:%s@%s/?retryWrites=true&w=majority", user, pass, host)
 
-	conn := fmt.Sprintf("mongodb://%s:%s@%s:%s", user, pass, host, port)
-	if port == "" || port == "0" {
-		fmt.Println("Using mongo+srv config")
-		conn = fmt.Sprintf("mongodb+srv://%s:%s@%s/?retryWrites=true&w=majority", user, pass, host)
-	}
 	serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
 	clientOptions := options.Client().ApplyURI(conn).SetServerAPIOptions(serverAPIOptions)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
