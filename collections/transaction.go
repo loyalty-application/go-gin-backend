@@ -3,7 +3,6 @@ package collections
 import (
 	"context"
 	"log"
-	"strconv"
 	"time"
 
 	"github.com/loyalty-application/go-gin-backend/config"
@@ -91,7 +90,7 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 
 	// Insert documents in the current session
 	log.Println("Before Insert")
-	result, err = transactionCollection.InsertMany(mongo.NewSessionContext(context.Background(),session), t)
+	result, err = transactionCollection.InsertMany(mongo.NewSessionContext(context.Background(), session), t)
 	log.Println("After Insert")
 	defer cancel()
 

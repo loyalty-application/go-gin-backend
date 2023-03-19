@@ -22,7 +22,7 @@ func DBinstance() (client *mongo.Client) {
 	port := os.Getenv("MONGO_PORT")
 
 	conn := fmt.Sprintf("mongodb://%s:%s@%s:%s", user, pass, host, port)
-	if port == "" || port == "443" {
+	if port == "" || port == "0" {
 		fmt.Println("Using mongo+srv config")
 		conn = fmt.Sprintf("mongodb+srv://%s:%s@%s/?retryWrites=true&w=majority", user, pass, host)
 	}
@@ -61,7 +61,7 @@ func InitIndexes(client *mongo.Client) {
 		Keys:    bson.D{{Key: "campaign_id", Value: -1}},
 		Options: options.Index().SetUnique(true),
 	}
-	
+
 	campaignIndexCreated, err := campaignCollection.Indexes().CreateOne(context.Background(), campaignIndexModel)
 	if err != nil {
 		log.Fatal(err)

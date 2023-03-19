@@ -1,11 +1,11 @@
 root = "."
 testdata_dir = "testdata"
-tmp_dir = "tmp"
+tmp_dir = "build"
 
 [build]
 args_bin = []
-bin = "./tmp/main"
-cmd = "swag init && go build -o ./tmp/main ."
+bin = "./build/main"
+cmd = "swag init && go build -o ./build/main ."
 delay = 0
 exclude_dir = ["docs", "assets", "tmp", "vendor", "testdata"]
 exclude_file = []
