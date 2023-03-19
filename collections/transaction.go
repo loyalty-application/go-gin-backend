@@ -58,7 +58,7 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 	t := make([]interface{}, len(transactions.Transactions))
 	for i, v := range transactions.Transactions {
 		v.UserId = userId
-		log.Println(v)
+		// log.Println(v)
 		t[i] = v
 		// // To test 100k records in 1 transaction
 		// for j, count := 0, 0; j < 100000; j++ {
@@ -80,7 +80,7 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 	bulkWriteOptions := options.BulkWrite().SetOrdered(false)
 	// log.Println("Bulk Writing", models)
 	result, err = transactionCollection.BulkWrite(ctx, models, bulkWriteOptions)
-    if err != nil {
+    if err != nil && !mongo.IsDuplicateKeyError(err) {
         log.Println(err.Error())
 		return result, err
     }
