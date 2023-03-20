@@ -7,12 +7,49 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/loyalty-application/go-gin-backend/collections"
 	"github.com/loyalty-application/go-gin-backend/models"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type TransactionController struct{}
 
-// @Summary Retrieve Transacations of all Users
+// @Summary Retrieve Transactions of all Users
+// @Description Retrieve all transaction records
+// @Tags    transaction
+// @Accept  application/json
+// @Produce application/json
+// @Param   Authorization header string true "Bearer eyJhb..."
+// @Param   transaction_id path string true "transaction's id"
+// @Success 200 {object} models.Transaction
+// @Failure 400 {object} models.HTTPError
+// @Router  /transaction/{transaction_id} [put]
+func (t TransactionController) UpdateTransaction(c *gin.Context) {
+	transactionId := c.Param("transactionId")
+	if transactionId == "" {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Transaction Id"})
+		return
+	}
+
+	data := new(models.Transaction)
+	err := c.BindJSON(data)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Transaction Object " + err.Error()})
+		return
+	}
+
+	// transaction id should not be modified
+	if data.TransactionId != "" {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Transaction Id should not be modified"})
+	}
+
+	result, err := collections.UpdateTransaction(transactionId, *data)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Transaction " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
+// @Summary Retrieve Transactions of all Users
 // @Description Retrieve all transaction records
 // @Tags    transaction
 // @Accept  application/json
@@ -22,7 +59,7 @@ type TransactionController struct{}
 // @Param   page query int false "page of records, starts from 0" minimum(0) default(0)
 // @Success 200 {object} []models.Transaction
 // @Failure 400 {object} models.HTTPError
-// @Router  /transaction/ [get]
+// @Router  /transaction [get]
 func (t TransactionController) GetAllTransactions(c *gin.Context) {
 
 	// required
@@ -132,10 +169,23 @@ func (t TransactionController) PostTransactions(c *gin.Context) {
 	result, err := collections.CreateTransactions(userId, *data)
 	if err != nil {
 		msg := "Invalid Transactions"
-		if mongo.IsDuplicateKeyError(err) {
-			msg = "transaction_id already exists"
-		}
 		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: msg})
+		return
+	}
+
+	c.JSON(http.StatusCreated, result)
+}
+
+func (t TransactionController) DeleteTransaction(c *gin.Context) {
+	transactionId := c.Param("transactionId")
+	if transactionId == "" {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Transaction Id"})
+		return
+	}
+
+	result, err := collections.DeleteTransaction(transactionId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Transaction doesn't exist"})
 		return
 	}
 

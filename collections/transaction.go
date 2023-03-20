@@ -3,6 +3,7 @@ package collections
 import (
 	"context"
 	"log"
+	"math/rand"
 	"time"
 
 	"github.com/loyalty-application/go-gin-backend/config"
@@ -10,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/imdario/mergo"
 )
 
 var transactionCollection *mongo.Collection = config.OpenCollection(config.Client, "transactions")
@@ -58,7 +60,12 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 	t := make([]interface{}, len(transactions.Transactions))
 	for i, v := range transactions.Transactions {
 		v.UserId = userId
-		// log.Println(v)
+
+		// Placeholders for testing
+		v.Points = rand.Float64() * 100
+		v.Cashback = rand.Float64() * 100
+		v.Miles = rand.Float64() * 100
+
 		t[i] = v
 		// // To test 100k records in 1 transaction
 		// for j, count := 0, 0; j < 100000; j++ {
@@ -81,8 +88,7 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 	// log.Println("Bulk Writing", models)
 	result, err = transactionCollection.BulkWrite(ctx, models, bulkWriteOptions)
     if err != nil && !mongo.IsDuplicateKeyError(err) {
-        log.Println(err.Error())
-		return result, err
+        panic(err)
     }
 
 	// Please don't delete the code below in case we need to reuse transactions in the future - Gabriel
@@ -121,6 +127,57 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 
 	// // Commit documents if no error
 	// err = session.CommitTransaction(context.Background())
+
+	return result, err
+}
+
+func UpdateTransaction(transactionId string, transaction models.Transaction) (result *mongo.UpdateResult, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Get original data
+	filter := bson.D{{Key: "transaction_id", Value: transactionId}}
+	singleResult := transactionCollection.FindOne(ctx, filter)
+	if singleResult.Err() != nil {
+		log.Println(singleResult.Err().Error())
+		return nil, singleResult.Err()
+	}
+
+	// Update original data with changed fields in transaction
+	initialTransaction := models.Transaction{}
+	err = singleResult.Decode(&initialTransaction)
+	if err != nil {
+		panic(err)
+	}
+	
+	if err = mergo.Merge(&initialTransaction, transaction, mergo.WithOverride); err != nil {
+		log.Println(err.Error())
+		panic(err)
+	}
+
+	// Insert into db
+	update := bson.D{{Key: "$set", Value: initialTransaction}}
+
+	result, err = transactionCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		panic(err)
+	}
+
+	return result, err
+}
+
+func DeleteTransaction(transactionId string) (result *mongo.UpdateResult, err error){
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	filter := bson.D{{Key: "transaction_id", Value: transactionId}}
+	update := bson.D{{Key: "$set", Value: bson.M{"is_deleted": true}}}
+
+	log.Println("Deleting", transactionId)
+	result, err = transactionCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		panic(err)
+	}
 
 	return result, err
 }

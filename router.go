@@ -54,7 +54,9 @@ func InitRoutes() {
 
 	transactionGroup.GET("/", transaction.GetAllTransactions)
 	transactionGroup.GET("/:userId", transaction.GetTransactionsForUser)
+	transactionGroup.PUT("/:transactionId", transaction.UpdateTransaction)
 	transactionGroup.POST("/:userId", transaction.PostTransactions)
+	transactionGroup.DELETE("/:transactionId", transaction.DeleteTransaction)
 
 	// Create a campaign
 	campaignGroup := v1.Group("/campaign")

@@ -19,7 +19,9 @@ func DBinstance() (client *mongo.Client) {
 	user := os.Getenv("MONGO_USERNAME")
 	pass := os.Getenv("MONGO_PASSWORD")
 	host := os.Getenv("MONGO_HOST")
-	conn := fmt.Sprintf("mongodb+srv://%s:%s@%s/?retryWrites=true&w=majority", user, pass, host)
+	port := os.Getenv("MONGO_PORT")
+
+	conn := fmt.Sprintf("mongodb://%s:%s@%s:%s/?replicaSet=replica-set", user, pass, host, port)
 
 	serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
 	clientOptions := options.Client().ApplyURI(conn).SetServerAPIOptions(serverAPIOptions)

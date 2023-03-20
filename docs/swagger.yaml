@@ -106,6 +106,8 @@ definitions:
       amount:
         example: 20.1
         type: number
+      campaign:
+        $ref: '#/definitions/models.Campaign'
       card_id:
         example: "4111222233334444"
         type: string
@@ -115,21 +117,30 @@ definitions:
       card_type:
         example: super_miles_card
         type: string
+      cashback:
+        example: 100
+        type: number
       currency:
         example: USD
         type: string
       id:
         example: 1
         type: integer
+      is_deleted:
+        example: false
+        type: boolean
       mcc:
         example: "5311"
         type: string
       merchant:
         example: 7-11
         type: string
+      miles:
+        example: 100
+        type: number
       points:
         example: 100
-        type: integer
+        type: number
       transaction_date:
         example: yyyy-mm-dd hh:mm:ss
         type: string
@@ -381,7 +392,7 @@ paths:
       summary: Health Check
       tags:
       - health
-  /transaction/:
+  /transaction:
     get:
       consumes:
       - application/json
@@ -417,7 +428,37 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/models.HTTPError'
-      summary: Retrieve Transacations of all Users
+      summary: Retrieve Transactions of all Users
+      tags:
+      - transaction
+  /transaction/{transaction_id}:
+    put:
+      consumes:
+      - application/json
+      description: Retrieve all transaction records
+      parameters:
+      - description: Bearer eyJhb...
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: transaction's id
+        in: path
+        name: transaction_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Transaction'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.HTTPError'
+      summary: Retrieve Transactions of all Users
       tags:
       - transaction
   /transaction/{user_id}:
