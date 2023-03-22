@@ -50,7 +50,7 @@ func (t CampaignController) GetCampaignId(c *gin.Context) {
 // @Success 200 {object} models.Campaign
 // @Failure 400 {object} models.HTTPError
 // @Router  /campaign/{date} [get]
-func (t CampaignController) GetActiveCampaign(c *gin.Context) {
+func (t CampaignController) GetActiveCampaigns(c *gin.Context) {
 	layout := "2006-01-02T15:04:05.000Z"
 	input := c.Param("currentDate")
 
