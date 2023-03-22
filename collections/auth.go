@@ -56,7 +56,7 @@ func RetrieveAllUsers(skip int64, slice int64) (result []models.User, err error)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	opts := options.Find().SetSort(bson.D{{Key: "transaction_date", Value: 1}}).SetLimit(slice).SetSkip(skip)
+	opts := options.Find().SetSort(bson.D{{Key: "_id", Value: 1}}).SetLimit(slice).SetSkip(skip)
 
 	cursor, err := transactionCollection.Find(ctx, bson.D{}, opts)
 	if err != nil {

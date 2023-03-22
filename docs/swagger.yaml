@@ -92,6 +92,24 @@ definitions:
           $ref: '#/definitions/models.Campaign'
         type: array
     type: object
+  models.Card:
+    properties:
+      card_id:
+        example: "4111222233334444"
+        type: string
+      card_pan:
+        example: xyz
+        type: string
+      card_type:
+        example: super_miles_card
+        type: string
+      value:
+        example: 100
+        type: number
+      value_type:
+        example: miles
+        type: string
+    type: object
   models.HTTPError:
     properties:
       code:

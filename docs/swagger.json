@@ -701,6 +701,31 @@
                 }
             }
         },
+        "models.Card": {
+            "type": "object",
+            "properties": {
+                "card_id": {
+                    "type": "string",
+                    "example": "4111222233334444"
+                },
+                "card_pan": {
+                    "type": "string",
+                    "example": "xyz"
+                },
+                "card_type": {
+                    "type": "string",
+                    "example": "super_miles_card"
+                },
+                "value": {
+                    "type": "number",
+                    "example": 100
+                },
+                "value_type": {
+                    "type": "string",
+                    "example": "miles"
+                }
+            }
+        },
         "models.HTTPError": {
             "type": "object",
             "properties": {
