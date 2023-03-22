@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -31,19 +32,19 @@ func (a AuthController) Login(c *gin.Context) {
 	var dbUser models.User
 
 	if err := c.BindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Request Body"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Request Body"})
 		return
 	}
 
 	dbUser, err := collections.RetrieveUser(user)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Login"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Login"})
 		return
 	}
 
 	passwordIsValid := services.VerifyPassword(*user.Password, *dbUser.Password)
 	if passwordIsValid != true {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Login"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Login"})
 		return
 	}
 
@@ -66,27 +67,26 @@ func (a AuthController) Login(c *gin.Context) {
 // @Router  /auth/registration [post]
 func (a AuthController) Registration(c *gin.Context) {
 	var user models.User
-
 	if err := c.BindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Registration Request"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Registration Request"})
 		return
 	}
 
 	validationErr := validate.Struct(user)
 	if validationErr != nil {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Registration Request"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Registration Request"})
 		return
 	}
 
 	count, err := collections.CountUserEmail(*user.Email)
 	if err != nil || count > 0 {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Email already exists"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Email already exists"})
 		return
 	}
 
 	count, err = collections.CountUserPhone(*user.Phone)
 	if err != nil || count > 0 {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Phone number already exists"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Phone number already exists"})
 		return
 	}
 
@@ -104,11 +104,49 @@ func (a AuthController) Registration(c *gin.Context) {
 
 	result, err := collections.CreateUser(user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.HTTPError{http.StatusBadRequest, "User was not created"})
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusBadRequest, Message: "User was not created"})
 		return
 	}
 
 	// TODO: change to proper request instead of mongodb's successful insertion format
 	c.JSON(http.StatusOK, result)
 
+}
+
+func (a AuthController) GetAllUsers(c *gin.Context) {
+
+	// required
+	limit := c.Query("limit")
+	if limit == "" {
+		limit = "100"
+	}
+
+	// optional
+	page := c.Query("page")
+	if page == "" {
+		page = "0"
+	}
+
+	pageInt, err := strconv.ParseInt(page, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Page Param"})
+	}
+	limitInt, err := strconv.ParseInt(limit, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Limit Param"})
+	}
+
+	if pageInt < 0 || limitInt <= 0 {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Param page should be >= 0 and limit should be > 0 "})
+		return
+	}
+
+	skipInt := pageInt * limitInt
+	result, err := collections.RetrieveAllUsers(skipInt, limitInt)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "Failed to retrieve users"})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
 }

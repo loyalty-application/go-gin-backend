@@ -1,14 +1,16 @@
 package main
 
 import (
+	"log"
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/loyalty-application/go-gin-backend/controllers"
 	"github.com/loyalty-application/go-gin-backend/docs"
 	"github.com/loyalty-application/go-gin-backend/middlewares"
-	"github.com/swaggo/files"
-	"github.com/swaggo/gin-swagger"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func InitRoutes() {
@@ -19,15 +21,24 @@ func InitRoutes() {
 	auth := new(controllers.AuthController)
 	transaction := new(controllers.TransactionController)
 	campaign := new(controllers.CampaignController)
+	card := new(controllers.CardController)
 
 	// necessary for swagger
 	docs.SwaggerInfo.BasePath = "/api/v1"
 
-	router := gin.New()
+	router := gin.Default()
 	// logging to stdout
 	router.Use(gin.Logger())
+	log.Println("GIN_MODE = ", os.Getenv("GIN_MODE"))
+
 	// recover from panics and respond with internal server error
 	router.Use(gin.Recovery())
+
+	// enabling cors
+	config := cors.DefaultConfig()
+	config.AllowHeaders = []string{"*"}
+	config.AllowAllOrigins = true
+	router.Use(cors.New(config))
 
 	// swagger
 	swaggerGroup := router.Group("/docs")
@@ -38,7 +49,7 @@ func InitRoutes() {
 
 	// healthcheck
 	healthGroup := v1.Group("/health")
-	healthGroup.GET("/", health.GetStatus)
+	healthGroup.GET("", health.GetStatus)
 
 	// authentication
 	authGroup := v1.Group("/auth")
@@ -49,18 +60,29 @@ func InitRoutes() {
 	transactionGroup := v1.Group("/transaction")
 	transactionGroup.Use(middlewares.AuthMiddleware())
 
-	transactionGroup.GET("/:userId", transaction.GetTransactions)
+	transactionGroup.GET("", transaction.GetAllTransactions)
+	transactionGroup.GET("/:userId", transaction.GetTransactionsForUser)
+	transactionGroup.PUT("/:transactionId", transaction.UpdateTransaction)
 	transactionGroup.POST("/:userId", transaction.PostTransactions)
+	transactionGroup.DELETE("/:transactionId", transaction.DeleteTransaction)
 
-	// Create a campaign
+	// campaign
 	campaignGroup := v1.Group("/campaign")
 	campaignGroup.Use(middlewares.AuthMiddleware())
 
-	campaignGroup.GET("/", campaign.GetCampaigns)
+	campaignGroup.GET("", campaign.GetCampaigns)
 	campaignGroup.GET("/:campaignId", campaign.GetCampaignId)
 	campaignGroup.POST("/:userId", campaign.PostCampaign)
 	campaignGroup.PUT("/:campaignId", campaign.UpdateCampaign)
-	campaignGroup.DELETE("/:campaignId", campaign.DeleteCampaign)
+	campaignGroup.PUT("/:campaignId/delete", campaign.DeleteCampaign)
+
+	// card
+	cardGroup := v1.Group("/card")
+	cardGroup.Use(middlewares.AuthMiddleware())
+
+	cardGroup.GET("", card.GetCards)
+	cardGroup.GET("/:cardId", card.GetSpecificCard)
+	cardGroup.POST("", card.PostCard)
 
 	router.Run(":" + PORT)
 }

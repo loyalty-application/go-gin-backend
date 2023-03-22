@@ -25,4 +25,10 @@ go.work
 .env
 
 # Air builds
+build
 tmp
+
+# MacOS
+.DS_Store
+
+

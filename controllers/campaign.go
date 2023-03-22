@@ -25,14 +25,14 @@ func (t CampaignController) GetCampaignId(c *gin.Context) {
 	campaignId := c.Param("campaignId")
 
 	if campaignId == "" {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Campaign Id"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Campaign Id"})
 		return
 	}
 
 	result, err := collections.RetrieveCampaign(campaignId)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.HTTPError{http.StatusInternalServerError, "Failed to retrieve campaign on campaignId"})
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "Failed to retrieve campaign on campaignId"})
 		return
 	}
 
@@ -52,7 +52,7 @@ func (t CampaignController) GetCampaigns(c *gin.Context) {
 	result, err := collections.RetrieveAllCampaigns()
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.HTTPError{http.StatusInternalServerError, "Failed to retrieve campaign"})
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "Failed to retrieve campaign"})
 		return
 	}
 	c.JSON(http.StatusOK, result)
@@ -73,31 +73,35 @@ func (t CampaignController) PostCampaign(c *gin.Context) {
 	// TODO: should post campaign on merchantId
 	userId := c.Param("userId")
 	if userId == "" {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid User Id"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid User Id"})
 		return
 	}
 
 	data := new(models.CampaignList)
 	err := c.BindJSON(data)
-	startDate := data.Campaigns[0].StartDate
-	endDate := data.Campaigns[0].EndDate
-	cardType := data.Campaigns[0].CardType
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Campaign Object" + err.Error()})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Campaign Object" + err.Error()})
 		return
 	}
 
-	if err := validators.ValidateStartDate(c, startDate); err != nil {
-		return
-	}
+	// Validation Checks
+	for _, v := range data.Campaigns {
+		startDate := v.StartDate
+		endDate := v.EndDate
+		cardType := v.CardType
 
-	if err := validators.ValidateEndDate(c, startDate, endDate); err != nil {
-		return
-	}
-
-	if err := validators.ValidateCardType(c, cardType); err != nil {
-		return
+		if err := validators.ValidateStartDate(c, startDate); err != nil {
+			return
+		}
+	
+		if err := validators.ValidateEndDate(c, startDate, endDate); err != nil {
+			return
+		}
+	
+		if err := validators.ValidateCardType(c, cardType); err != nil {
+			return
+		}
 	}
 
 	_, err = collections.CreateCampaign(userId, *data)
@@ -106,7 +110,7 @@ func (t CampaignController) PostCampaign(c *gin.Context) {
 		if mongo.IsDuplicateKeyError(err) {
 			msg = "campaign_id already exists"
 		}
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, msg})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: msg})
 		return
 	}
 
@@ -127,7 +131,7 @@ func (t CampaignController) PostCampaign(c *gin.Context) {
 func (t CampaignController) UpdateCampaign(c *gin.Context) {
 	campaignId := c.Param("campaignId")
 	if campaignId == "" {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Campaign Id"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Campaign Id"})
 		return
 	}
 
@@ -138,7 +142,7 @@ func (t CampaignController) UpdateCampaign(c *gin.Context) {
 	cardType := data.CardType
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Campaign Object" + err.Error()})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Campaign Object" + err.Error()})
 		return
 	}
 
@@ -160,7 +164,7 @@ func (t CampaignController) UpdateCampaign(c *gin.Context) {
 		if mongo.IsDuplicateKeyError(err) {
 			msg = "campaign_id already exists"
 		}
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, msg})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: msg})
 		return
 	}
 
@@ -174,21 +178,33 @@ func (t CampaignController) UpdateCampaign(c *gin.Context) {
 // @Produce application/json
 // @Param   Authorization header string true "Bearer eyJhb..."
 // @Param   campaign_id path string true "campaign's id"
-// @Success 204
+// @Param   body body models.CampaignList true "campaign"
+// @Success 200 {object} models.Campaign
 // @Failure 400 {object} models.HTTPError
-// @Router  /campaign/{campaign_id} [delete]
+// @Router  /campaign/{campaign_id}/delete [put]
 func (t CampaignController) DeleteCampaign(c *gin.Context) {
 	campaignId := c.Param("campaignId")
 	if campaignId == "" {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Campaign Id"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Campaign Id"})
 		return
 	}
 
-	err := collections.DeleteCampaign(campaignId)
+	data := new(models.Campaign)
+	err := c.BindJSON(data)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest, "Invalid Campaign"})
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Campaign Object" + err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusNoContent, err)
+	_, err = collections.DeleteCampaign(campaignId, *data)
+	if err != nil {
+		msg := "Invalid Campaign"
+		if mongo.IsDuplicateKeyError(err) {
+			msg = "campaign_id already exists"
+		}
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: msg})
+		return
+	}
+
+	c.JSON(http.StatusOK, "Campaign with campaign ID: "+campaignId+" is deleted")
 }

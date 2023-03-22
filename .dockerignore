@@ -2,4 +2,4 @@
 .env
 
 # Air build
-tmp
+build
