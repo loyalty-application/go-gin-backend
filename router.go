@@ -36,7 +36,7 @@ func InitRoutes() {
 
 	// enabling cors
 	config := cors.DefaultConfig()
-	config.AddAllowHeaders("Origin", "Authorization")
+	config.AllowHeaders = []string{"*"}
 	config.AllowAllOrigins = true
 	router.Use(cors.New(config))
 
