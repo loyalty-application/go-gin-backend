@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -110,4 +111,42 @@ func (a AuthController) Registration(c *gin.Context) {
 	// TODO: change to proper request instead of mongodb's successful insertion format
 	c.JSON(http.StatusOK, result)
 
+}
+
+func (a AuthController) GetAllUsers(c *gin.Context) {
+
+	// required
+	limit := c.Query("limit")
+	if limit == "" {
+		limit = "100"
+	}
+
+	// optional
+	page := c.Query("page")
+	if page == "" {
+		page = "0"
+	}
+
+	pageInt, err := strconv.ParseInt(page, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Page Param"})
+	}
+	limitInt, err := strconv.ParseInt(limit, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Limit Param"})
+	}
+
+	if pageInt < 0 || limitInt <= 0 {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Param page should be >= 0 and limit should be > 0 "})
+		return
+	}
+
+	skipInt := pageInt * limitInt
+	result, err := collections.RetrieveAllUsers(skipInt, limitInt)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "Failed to retrieve users"})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
 }
