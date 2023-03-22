@@ -7,6 +7,7 @@ import (
 	"github.com/loyalty-application/go-gin-backend/validators"
 	"go.mongodb.org/mongo-driver/mongo"
 	"net/http"
+	"time"
 )
 
 type CampaignController struct{}
@@ -33,6 +34,42 @@ func (t CampaignController) GetCampaignId(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "Failed to retrieve campaign on campaignId"})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
+// @Summary Retrieve Active Campaign based on date
+// @Description Retrieve Active Campaign based on date
+// @Tags    campaign
+// @Accept  application/json
+// @Produce application/json
+// @Param   Authorization header string true "Bearer eyJhb..."
+// @Param   date path time.Time true "campaign's date"
+// @Success 200 {object} models.Campaign
+// @Failure 400 {object} models.HTTPError
+// @Router  /campaign/{date} [get]
+func (t CampaignController) GetActiveCampaign(c *gin.Context) {
+	layout := "2006-01-02T15:04:05.000Z"
+	input := c.Param("currentDate")
+
+	if input == "" {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Missing Date"})
+		return
+	}
+
+	currentDate, err := time.Parse(layout, input)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "Invalid Date"})
+		return
+	}
+
+	result, err := collections.RetrieveActiveCampaigns(currentDate)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "Failed to retrieve active campaign(s) on date"})
 		return
 	}
 
@@ -94,11 +131,11 @@ func (t CampaignController) PostCampaign(c *gin.Context) {
 		if err := validators.ValidateStartDate(c, startDate); err != nil {
 			return
 		}
-	
+
 		if err := validators.ValidateEndDate(c, startDate, endDate); err != nil {
 			return
 		}
-	
+
 		if err := validators.ValidateCardType(c, cardType); err != nil {
 			return
 		}
