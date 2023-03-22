@@ -81,6 +81,8 @@ func InitRoutes() {
 	cardGroup.Use(middlewares.AuthMiddleware())
 
 	cardGroup.GET("", card.GetCards)
+	cardGroup.GET("/:cardId", card.GetSpecificCard)
+	cardGroup.POST("", card.PostCard)
 
 	router.Run(":" + PORT)
 }

@@ -1,5 +1,9 @@
 package models
 
+type CardList struct {
+	Cards []Card `json:"cards" bson:",inline"`
+}
+
 type Card struct {
 	CardId   string  `json:"card_id" bson:"card_id" example:"4111222233334444"`
 	CardPan  string  `json:"card_pan" bson:"card_pan" example:"xyz"`
