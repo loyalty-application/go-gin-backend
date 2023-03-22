@@ -5,6 +5,7 @@ WORKDIR /app
 ENV GIN_MODE=release
 
 COPY go.mod ./
+
 COPY go.sum ./
 
 RUN go mod download

@@ -370,7 +370,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/transaction/": {
+        "/transaction": {
             "get": {
                 "description": "Retrieve all transaction records",
                 "consumes": [
@@ -382,7 +382,7 @@ const docTemplate = `{
                 "tags": [
                     "transaction"
                 ],
-                "summary": "Retrieve Transacations of all Users",
+                "summary": "Retrieve Transactions of all Users",
                 "parameters": [
                     {
                         "type": "string",
@@ -416,6 +416,51 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/models.Transaction"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/transaction/{transaction_id}": {
+            "put": {
+                "description": "Retrieve all transaction records",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transaction"
+                ],
+                "summary": "Retrieve Transactions of all Users",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer eyJhb...",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "transaction's id",
+                        "name": "transaction_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Transaction"
                         }
                     },
                     "400": {
@@ -683,6 +728,31 @@ const docTemplate = `{
                 }
             }
         },
+        "models.Card": {
+            "type": "object",
+            "properties": {
+                "card_id": {
+                    "type": "string",
+                    "example": "4111222233334444"
+                },
+                "card_pan": {
+                    "type": "string",
+                    "example": "xyz"
+                },
+                "card_type": {
+                    "type": "string",
+                    "example": "super_miles_card"
+                },
+                "value": {
+                    "type": "number",
+                    "example": 100
+                },
+                "value_type": {
+                    "type": "string",
+                    "example": "miles"
+                }
+            }
+        },
         "models.HTTPError": {
             "type": "object",
             "properties": {
@@ -703,6 +773,9 @@ const docTemplate = `{
                     "type": "number",
                     "example": 20.1
                 },
+                "campaign": {
+                    "$ref": "#/definitions/models.Campaign"
+                },
                 "card_id": {
                     "type": "string",
                     "example": "4111222233334444"
@@ -712,7 +785,12 @@ const docTemplate = `{
                     "example": "xyz"
                 },
                 "card_type": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "super_miles_card"
+                },
+                "cashback": {
+                    "type": "number",
+                    "example": 100
                 },
                 "currency": {
                     "type": "string",
@@ -722,6 +800,10 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 1
                 },
+                "is_deleted": {
+                    "type": "boolean",
+                    "example": false
+                },
                 "mcc": {
                     "type": "string",
                     "example": "5311"
@@ -729,6 +811,14 @@ const docTemplate = `{
                 "merchant": {
                     "type": "string",
                     "example": "7-11"
+                },
+                "miles": {
+                    "type": "number",
+                    "example": 100
+                },
+                "points": {
+                    "type": "number",
+                    "example": 100
                 },
                 "transaction_date": {
                     "type": "string",
