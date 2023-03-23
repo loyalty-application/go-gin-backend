@@ -83,6 +83,7 @@ func InitRoutes() {
 	cardGroup.GET("", card.GetCards)
 	cardGroup.GET("/:cardId", card.GetSpecificCard)
 	cardGroup.POST("", card.PostCard)
+	cardGroup.PUT("/:cardId", card.UpdateCard)
 
 	router.Run(":" + PORT)
 }

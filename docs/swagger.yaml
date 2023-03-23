@@ -113,6 +113,12 @@ definitions:
         example: miles
         type: string
     type: object
+  models.CardUpdateRequest:
+    properties:
+      value:
+        example: 100
+        type: number
+    type: object
   models.HTTPError:
     properties:
       code:
@@ -456,6 +462,12 @@ paths:
         name: Authorization
         required: true
         type: string
+      - description: card
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.Card'
       produces:
       - application/json
       responses:
@@ -500,6 +512,41 @@ paths:
           schema:
             $ref: '#/definitions/models.HTTPError'
       summary: Retrieve specific Card
+      tags:
+      - card
+    put:
+      consumes:
+      - application/json
+      description: Update specific Card
+      parameters:
+      - description: Bearer eyJhb...
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: card's id
+        in: path
+        name: card_id
+        required: true
+        type: string
+      - description: card
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.Card'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CardUpdateRequest'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.HTTPError'
+      summary: Update a Card
       tags:
       - card
   /health:

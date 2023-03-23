@@ -422,6 +422,15 @@ const docTemplate = `{
                         "name": "Authorization",
                         "in": "header",
                         "required": true
+                    },
+                    {
+                        "description": "card",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Card"
+                        }
                     }
                 ],
                 "responses": {
@@ -477,6 +486,58 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/models.Card"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.HTTPError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update specific Card",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "card"
+                ],
+                "summary": "Update a Card",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer eyJhb...",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "card's id",
+                        "name": "card_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "card",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Card"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.CardUpdateRequest"
                         }
                     },
                     "400": {
@@ -891,6 +952,15 @@ const docTemplate = `{
                 "value_type": {
                     "type": "string",
                     "example": "miles"
+                }
+            }
+        },
+        "models.CardUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "value": {
+                    "type": "number",
+                    "example": 100
                 }
             }
         },
