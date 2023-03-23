@@ -56,6 +56,14 @@ func InitRoutes() {
 	authGroup.POST("/registration", auth.Registration)
 	authGroup.POST("/login", auth.Login)
 
+	// users
+	userGroup := v1.Group("/user")
+	userGroup.Use(middlewares.AuthMiddleware())
+	log.Println("I'm here")
+	userGroup.GET("", auth.GetAllUsers)
+	userGroup.GET("/:email", auth.GetSpecificUser)
+	userGroup.PUT("/:email", auth.UpdateUser)
+
 	// transaction
 	transactionGroup := v1.Group("/transaction")
 	transactionGroup.Use(middlewares.AuthMiddleware())
@@ -83,6 +91,7 @@ func InitRoutes() {
 	cardGroup.GET("", card.GetCards)
 	cardGroup.GET("/:cardId", card.GetSpecificCard)
 	cardGroup.POST("", card.PostCard)
+	cardGroup.PUT("/:cardId", card.UpdateCard)
 
 	router.Run(":" + PORT)
 }
