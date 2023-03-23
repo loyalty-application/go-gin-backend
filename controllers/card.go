@@ -139,7 +139,7 @@ func (t CardController) PostCard(c *gin.Context) {
 // @Param   Authorization header string true "Bearer eyJhb..."
 // @Param   card_id path string true "card's id"
 // @Param   request body models.Card true "card"
-// @Success 200 {object} models.CardUpdateRequest
+// @Success 200 {object} models.Card
 // @Failure 400 {object} models.HTTPError
 // @Router  /card/{card_id} [put]
 func (t CardController) UpdateCard(c *gin.Context) {

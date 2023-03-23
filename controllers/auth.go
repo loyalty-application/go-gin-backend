@@ -11,6 +11,7 @@ import (
 	"github.com/loyalty-application/go-gin-backend/models"
 	"github.com/loyalty-application/go-gin-backend/services"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type AuthController struct{}
@@ -113,6 +114,18 @@ func (a AuthController) Registration(c *gin.Context) {
 
 }
 
+// @Summary Get all Users
+// @Description retrieve all Registered Users
+// @Tags    user
+// @Accept  application/json
+// @Produce application/json
+// @Param   Authorization header string true "Bearer eyJhb..."
+// @Param   limit query int false "maximum records per page" minimum(0) default(100)
+// @Param   page query int false "page of records, starts from 0" minimum(0) default(0)
+// @Success 200 {object} []models.User
+// @Failure 400 {object} models.HTTPError
+// @Failure 500 {object} models.HTTPError
+// @Router  /user [get]
 func (a AuthController) GetAllUsers(c *gin.Context) {
 
 	// required
@@ -145,6 +158,78 @@ func (a AuthController) GetAllUsers(c *gin.Context) {
 	result, err := collections.RetrieveAllUsers(skipInt, limitInt)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "Failed to retrieve users"})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
+// @Summary Get a User
+// @Description retrieve Specific registered User
+// @Tags    user
+// @Accept  application/json
+// @Produce application/json
+// @Param   Authorization header string true "Bearer eyJhb..."
+// @Param email path string true "email"
+// @Success 200 {object} models.User
+// @Failure 400 {object} models.HTTPError
+// @Failure 500 {object} models.HTTPError
+// @Router  /user/{email} [get]
+func (a AuthController) GetSpecificUser(c *gin.Context) {
+	email := c.Param("email")
+	if email == "" {
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "email cannot be blank"})
+		return
+	}
+
+	result, err := collections.RetrieveSpecificUser(email)
+	if err != nil {
+		msg := "Failed to retrieve user"
+		if err == mongo.ErrNoDocuments {
+			msg = "No User found with given email"
+		}
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: msg})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
+// @Summary Update User
+// @Description Update a specific User
+// @Tags    user
+// @Accept  application/json
+// @Produce application/json
+// @Param   Authorization header string true "Bearer eyJhb..."
+// @Param   email path string true "email"
+// @Param   request body models.UserUpdateRequest true "card"
+// @Success 200 {object} models.User
+// @Failure 400 {object} models.HTTPError
+// @Router  /user/{email} [put]
+func (a AuthController) UpdateUser(c *gin.Context) {
+	email := c.Param("email")
+	if email == "" {
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusBadRequest, Message: "email cannot be blank"})
+		return
+	}
+
+	data := new(models.User)
+	err := c.BindJSON(data)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid User Object" + err.Error()})
+		return
+	}
+
+	// TODO: Validation Checks
+
+	// Updating
+	result, err := collections.UpdateUser(email, *data)
+	if err != nil {
+		msg := "Updating user failed"
+		if err == mongo.ErrNoDocuments {
+			msg = "User with given email doesn't exist"
+		}
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: msg})
 		return
 	}
 

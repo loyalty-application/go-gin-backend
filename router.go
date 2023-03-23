@@ -56,6 +56,14 @@ func InitRoutes() {
 	authGroup.POST("/registration", auth.Registration)
 	authGroup.POST("/login", auth.Login)
 
+	// users
+	userGroup := v1.Group("/user")
+	userGroup.Use(middlewares.AuthMiddleware())
+	log.Println("I'm here")
+	userGroup.GET("", auth.GetAllUsers)
+	userGroup.GET("/:email", auth.GetSpecificUser)
+	userGroup.PUT("/:email", auth.UpdateUser)
+
 	// transaction
 	transactionGroup := v1.Group("/transaction")
 	transactionGroup.Use(middlewares.AuthMiddleware())
