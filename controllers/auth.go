@@ -220,12 +220,19 @@ func (a AuthController) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	// TODO: Validation Checks
+	// Validation Check for Card Ids
+	cardList := data.Card
+	for _, cardId := range cardList {
+		if _, err = collections.RetrieveSpecificCard(cardId); err != nil {
+			c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Card with Card Id " + cardId + " doesn't exist"})
+			return
+		}
+	}
 
 	// Updating
 	result, err := collections.UpdateUser(email, *data)
 	if err != nil {
-		msg := "Updating user failed"
+		msg := err.Error()
 		if err == mongo.ErrNoDocuments {
 			msg = "User with given email doesn't exist"
 		}

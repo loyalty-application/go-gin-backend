@@ -2,6 +2,7 @@ package collections
 
 import (
 	"context"
+	"errors"
 	"log"
 	"time"
 
@@ -127,19 +128,29 @@ func RetrieveSpecificUser(email string) (result models.User, err error) {
 func UpdateUser(email string, user models.User) (result *mongo.UpdateResult, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	log.Println("Before Retrieve")
+	
 	// Get original data
 	initialUser, err := RetrieveSpecificUser(email)
 	if err != nil {
 		log.Println(err.Error())
 		return nil, err
 	}
-	log.Println("Before Merge")
+
+	// Check to see if user already has card
+	for _, i := range user.Card {
+		for _, j := range initialUser.Card {
+			if i == j {
+				return nil, errors.New("User already has Card with given CardId")
+			}
+		}
+	}
+	
 	// Update original data with changed fields in transaction
+	user.Card = append(user.Card, initialUser.Card...)
 	if err := mergo.Merge(&initialUser, user, mergo.WithOverride); err != nil {
 		return nil, err
 	}
-	log.Println("After Merge")
+
 	// Insert into db
 	filter := bson.D{{Key: "email", Value: email}}
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: "first_name", Value: initialUser.FirstName},
