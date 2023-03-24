@@ -41,6 +41,28 @@ func RetrieveSpecificCard(cardId string) (result models.Card, err error) {
 	return result, err
 }
 
+func RetrieveListOfCards(cardIdList []string) (result []models.Card, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Base Case
+	if cardIdList == nil {
+		return nil, nil
+	}
+
+	filter := bson.M{"card_id": bson.M{"$in": cardIdList}}
+	cursor, err := cardCollection.Find(ctx, filter)
+	if err != nil {
+		return result, err
+	}
+
+	if err := cursor.All(ctx, &result); err != nil {
+		return result, err
+	}
+
+	return result, err
+}
+
 func CreateCard(card models.Card) (result *mongo.InsertOneResult, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
