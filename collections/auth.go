@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/imdario/mergo"
 	"github.com/loyalty-application/go-gin-backend/config"
 	"github.com/loyalty-application/go-gin-backend/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -52,18 +53,60 @@ func CreateUser(user models.User) (insertionNo *mongo.InsertOneResult, err error
 
 }
 
-func RetrieveAllUsers(skip int64, slice int64) (result []models.User, err error){
+func RetrieveAllUsers(skip int64, slice int64) (result []models.User, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	opts := options.Find().SetSort(bson.D{{Key: "_id", Value: 1}}).SetLimit(slice).SetSkip(skip)
 
-	cursor, err := transactionCollection.Find(ctx, bson.D{}, opts)
+	cursor, err := userCollection.Find(ctx, bson.D{}, opts)
 	if err != nil {
 		panic(err)
 	}
 
 	if err := cursor.All(ctx, &result); err != nil {
+		panic(err)
+	}
+
+	return result, err
+}
+
+func RetrieveSpecificUser(email string) (result models.User, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	filter := bson.D{{Key: "email", Value: email}}
+
+	err = userCollection.FindOne(ctx, filter).Decode(&result)
+
+	return result, err
+}
+
+func UpdateUser(email string, user models.User) (result *mongo.UpdateResult, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Get original data
+	initialUser, err := RetrieveSpecificUser(email)
+	if err != nil {
+		return nil, err
+	}
+
+	// Update original data with changed fields in transaction
+	if err := mergo.Merge(&initialUser, user, mergo.WithOverride); err != nil {
+		return nil, err
+	}
+
+	// Insert into db
+	filter := bson.D{{Key: "email", Value: email}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "first_name", Value: initialUser.FirstName}, 
+									 {Key: "last_name", Value: initialUser.LastName}, 
+									 {Key: "password", Value: initialUser.Password}, 
+									 {Key: "email", Value: initialUser.Email}, 
+									 {Key: "cards", Value: initialUser.Card}}}}
+
+	result, err = userCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
 		panic(err)
 	}
 

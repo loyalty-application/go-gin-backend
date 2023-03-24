@@ -13,13 +13,13 @@ import (
 
 var cardCollection *mongo.Collection = config.OpenCollection(config.Client, "cards")
 
-func GetAllCards(skip int64, slice int64) (cards []models.Card, err error) {
+func RetrieveAllCards(skip int64, slice int64) (cards []models.Card, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	opts := options.Find().SetSort(bson.D{{Key: "card_id", Value: 1}}).SetLimit(slice).SetSkip(skip)
 
-	cursor, err := transactionCollection.Find(ctx, bson.D{}, opts)
+	cursor, err := cardCollection.Find(ctx, bson.D{}, opts)
 	if err != nil {
 		panic(err)
 	}
@@ -29,4 +29,53 @@ func GetAllCards(skip int64, slice int64) (cards []models.Card, err error) {
 	}
 
 	return cards, err
+}
+
+func RetrieveSpecificCard(cardId string) (result models.Card, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	filter := bson.D{{Key: "card_id", Value: cardId}}
+	err = cardCollection.FindOne(ctx, filter).Decode(&result)
+	
+	return result, err
+}
+
+func CreateCard(card models.Card) (result *mongo.InsertOneResult, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	
+	result, err = cardCollection.InsertOne(ctx, card)
+
+	return result, err
+}
+
+func UpdateCardPoints(cardId string, card models.CardUpdateRequest) (result *mongo.UpdateResult, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Get original data
+	filter := bson.D{{Key: "card_id", Value: cardId}}
+	singleResult := cardCollection.FindOne(ctx, filter)
+	if singleResult.Err() != nil {
+		return nil, singleResult.Err()
+	}
+
+	// Update original data with changed fields in transaction
+	initialCard := models.Card{}
+	err = singleResult.Decode(&initialCard)
+	if err != nil {
+		panic(err)
+	}
+	initialCard.Value += card.Value
+
+	// Insert into db
+	update := bson.D{{Key: "$set", Value: initialCard}}
+
+	result, err = cardCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		panic(err)
+	}
+
+	return result, err
 }

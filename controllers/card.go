@@ -7,6 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/loyalty-application/go-gin-backend/collections"
 	"github.com/loyalty-application/go-gin-backend/models"
+	"github.com/loyalty-application/go-gin-backend/services"
+	"github.com/loyalty-application/go-gin-backend/validators"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type CardController struct{}
@@ -21,7 +24,7 @@ type CardController struct{}
 // @Param   page query int false "page of records, starts from 0" minimum(0) default(0)
 // @Success 200 {object} []models.Card
 // @Failure 400 {object} models.HTTPError
-// @Router  /transaction [get]
+// @Router  /card [get]
 func (t CardController) GetCards(c *gin.Context) {
 
 	// required
@@ -45,7 +48,7 @@ func (t CardController) GetCards(c *gin.Context) {
 	}
 
 	skipInt := pageInt * limitInt
-	result, err := collections.GetAllCards(skipInt, limitInt)
+	result, err := collections.RetrieveAllCards(skipInt, limitInt)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "Failed to retrieve cards"})
 		return
@@ -53,4 +56,111 @@ func (t CardController) GetCards(c *gin.Context) {
 
 	c.JSON(http.StatusOK, result)
 
+}
+
+// @Summary Retrieve specific Card
+// @Description Retrieve card based on its card_id
+// @Tags    card
+// @Accept  application/json
+// @Produce application/json
+// @Param   Authorization header string true "Bearer eyJhb..."
+// @Param   card_id path string true "card's id"
+// @Success 200 {object} models.Card
+// @Failure 400 {object} models.HTTPError
+// @Router  /card/{card_id} [get]
+func (t CardController) GetSpecificCard(c *gin.Context) {
+	cardId := c.Param("cardId")
+	if cardId == "" {
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "cardId cannot be blank"})
+		return
+	}
+	
+	result, err := collections.RetrieveSpecificCard(cardId)
+	if err != nil {
+		msg := "Failed to retrieve card"
+		if err == mongo.ErrNoDocuments {
+			msg = "No card found with given card id"
+		}
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: msg})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
+// @Summary Create Card
+// @Description Create new Card
+// @Tags    card
+// @Accept  application/json
+// @Produce application/json
+// @Param   Authorization header string true "Bearer eyJhb..."
+// @Param   request body models.Card true "card"
+// @Success 200 {object} []models.Card
+// @Failure 400 {object} models.HTTPError
+// @Router  /card [post]
+func (t CardController) PostCard(c *gin.Context) {
+
+	data := new(models.Card)
+	err := c.BindJSON(data)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Card Object" + err.Error()})
+		return
+	}
+
+	// validating card type
+	if err = validators.ValidateCardType(c, data.CardType); err != nil {
+		return
+	}
+
+	// setting card valueType (points / miles / cashback)
+	data.ValueType = services.ProcessCardType(*data)
+
+	// set card value to 0.0
+	data.Value = 0.0
+
+	result, err := collections.CreateCard(*data)
+	if err != nil {
+		msg := "Failed to insert card" + err.Error()
+		if mongo.IsDuplicateKeyError(err) {
+			msg = "CardId already exists"
+		}
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: msg})
+		return
+	}
+
+	c.JSON(http.StatusCreated, result)
+}
+
+// @Summary Update a Card
+// @Description Update specific Card
+// @Tags    card
+// @Accept  application/json
+// @Produce application/json
+// @Param   Authorization header string true "Bearer eyJhb..."
+// @Param   card_id path string true "card's id"
+// @Param   request body models.Card true "card"
+// @Success 200 {object} models.Card
+// @Failure 400 {object} models.HTTPError
+// @Router  /card/{card_id} [put]
+func (t CardController) UpdateCard(c *gin.Context) {
+	cardId := c.Param("cardId")
+	if cardId == "" {
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusBadRequest, Message: "cardId cannot be blank"})
+		return
+	}
+
+	data := new(models.CardUpdateRequest)
+	err := c.BindJSON(data)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Card Object" + err.Error()})
+		return
+	}
+
+	result, err := collections.UpdateCardPoints(cardId, *data)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Card Id doesn't exist"})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
 }
