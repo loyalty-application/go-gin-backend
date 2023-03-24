@@ -59,7 +59,7 @@ func InitRoutes() {
 	// users
 	userGroup := v1.Group("/user")
 	userGroup.Use(middlewares.AuthMiddleware())
-	log.Println("I'm here")
+	
 	userGroup.GET("", auth.GetAllUsers)
 	userGroup.GET("/:email", auth.GetSpecificUser)
 	userGroup.PUT("/:email", auth.UpdateUser)
