@@ -33,11 +33,11 @@ func RetrieveCampaign(campaignId string) (campaign models.Campaign, err error) {
 	return campaign, nil
 }
 
-func RetrieveActiveCampaigns(currentDate time.Time) (campaigns []models.Campaign, err error) {
+func RetrieveActiveCampaigns(currentDate string) (campaigns []models.Campaign, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	filter := bson.M{"startDate": bson.M{"$lt": currentDate}, "endDate": bson.M{"$gt": currentDate}}
+	filter := bson.M{"start_date": bson.M{"$lte": currentDate}, "end_date": bson.M{"$gte": currentDate}}
 	cursor, err := campaignCollection.Find(ctx, filter)
 	if err != nil {
 		panic(err)

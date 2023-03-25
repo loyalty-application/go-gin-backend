@@ -72,7 +72,7 @@ func InitRoutes() {
 
 	campaignGroup.GET("", campaign.GetCampaigns)
 	campaignGroup.GET("/:campaignId", campaign.GetCampaignId)
-	campaignGroup.GET("/:date", campaign.GetActiveCampaigns)
+	campaignGroup.GET("/active/:date", campaign.GetActiveCampaigns)
 	campaignGroup.POST("/:userId", campaign.PostCampaign)
 	campaignGroup.PUT("/:campaignId", campaign.UpdateCampaign)
 	campaignGroup.PUT("/:campaignId/delete", campaign.DeleteCampaign)
