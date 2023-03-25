@@ -140,6 +140,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/campaign/active/{date}": {
+            "get": {
+                "description": "Retrieve Active Campaign based on date",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "campaign"
+                ],
+                "summary": "Retrieve Active Campaign based on date",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer eyJhb...",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "campaign's active date",
+                        "name": "date",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Campaign"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/campaign/{campaign_id}": {
             "get": {
                 "description": "Retrieve Campaign based on campaignId",
@@ -1057,6 +1102,16 @@ const docTemplate = `{
         "models.Campaign": {
             "type": "object",
             "properties": {
+                "accepted_mccs": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "bonus_rates": {
+                    "type": "number",
+                    "example": 8.8
+                },
                 "campaign_id": {
                     "type": "string",
                     "example": "cmp00001"
@@ -1069,20 +1124,18 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "end_date": {
-                    "type": "string",
-                    "example": "2023-03-03T13:10:23Z"
-                },
-                "is_deleted": {
-                    "type": "boolean",
-                    "example": false
+                    "type": "string"
                 },
                 "merchant": {
                     "type": "string",
                     "example": "7-11"
                 },
+                "min_spend": {
+                    "type": "number",
+                    "example": 100
+                },
                 "start_date": {
-                    "type": "string",
-                    "example": "2023-03-02T13:10:23Z"
+                    "type": "string"
                 }
             }
         },
