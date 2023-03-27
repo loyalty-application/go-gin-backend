@@ -25,22 +25,24 @@ func DBinstance() (client *mongo.Client) {
 	if os.Getenv("GIN_MODE") == "release" {
 		replicaSet = "rs0"
 	}
-
 	conn := fmt.Sprintf("mongodb://%s:%s@%s:%s/?replicaSet=%s", user, pass, host, port, replicaSet)
+	fmt.Printf("Attempting connection with: %s", conn)
 	serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
 	clientOptions := options.Client().ApplyURI(conn).SetServerAPIOptions(serverAPIOptions)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+
+	fmt.Println("Connecting to MongoDB ...")
 	// connect to mongodb
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Connected to MongoDB!")
-
+	fmt.Println("Success!")
+	fmt.Println("Initialising indexes ...")
 	// initialise indexes
 	InitIndexes(client)
-
+	fmt.Println("Success!")
 	return client
 }
 
