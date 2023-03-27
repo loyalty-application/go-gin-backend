@@ -55,6 +55,7 @@ func DBinstance() (client *mongo.Client) {
 		//tlsQueryString = "&tls=true"
 		secondaryQueryString = "&readPreference=secondaryPreferred&retryWrites=false"
 
+		fmt.Println("Connected to DocumentDB!")
 		//// configure tls
 		//var filename = "rds-combined-ca-bundle.pem"
 		//tlsConfig := new(tls.Config)
@@ -73,26 +74,42 @@ func DBinstance() (client *mongo.Client) {
 		//return
 		//}
 
+		//if tlsConfig != nil {
+		//fmt.Println("Successfully set TLS config")
+		//clientOptions.SetTLSConfig(tlsConfig)
+		//}
+
 	}
 	conn = fmt.Sprintf("%s%s%s%s", conn, replicaSetQueryString, tlsQueryString, secondaryQueryString)
 
 	fmt.Printf("Attempting connection with: %s", conn)
-	serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
-	clientOptions := options.Client().ApplyURI(conn).SetServerAPIOptions(serverAPIOptions)
-	//if tlsConfig != nil {
-	//fmt.Println("Successfully set TLS config")
-	//clientOptions.SetTLSConfig(tlsConfig)
-	//}
+	//serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
+	//clientOptions := options.Client().ApplyURI(conn).SetServerAPIOptions(serverAPIOptions)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	fmt.Println("Connecting to MongoDB ...")
 	// connect to mongodb
-	client, err := mongo.Connect(ctx, clientOptions)
+	//client, err := mongo.Connect(ctx, clientOptions)
+	//if err != nil {
+	//log.Fatal(err)
+	//}
+
+	fmt.Println("Connecting to MongoDB ...")
+	err := client.Connect(ctx)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to connect to cluster: %v", err)
+	}
+
+	fmt.Println("Success!")
+	// Force a connection to verify our connection string
+
+	fmt.Println("Pinging server ...")
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		log.Fatalf("Failed to ping cluster: %v", err)
 	}
 	fmt.Println("Success!")
+
 	fmt.Println("Initialising indexes ...")
 	// initialise indexes
 	InitIndexes(client)
