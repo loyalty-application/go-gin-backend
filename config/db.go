@@ -2,7 +2,11 @@ package config
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"time"
@@ -14,6 +18,24 @@ import (
 
 var Client *mongo.Client = DBinstance()
 
+func getCustomTLSConfig(caFile string) (*tls.Config, error) {
+	tlsConfig := new(tls.Config)
+	certs, err := ioutil.ReadFile(caFile)
+
+	if err != nil {
+		return tlsConfig, err
+	}
+
+	tlsConfig.RootCAs = x509.NewCertPool()
+	ok := tlsConfig.RootCAs.AppendCertsFromPEM(certs)
+
+	if !ok {
+		return tlsConfig, errors.New("Failed parsing pem file")
+	}
+
+	return tlsConfig, nil
+}
+
 func DBinstance() (client *mongo.Client) {
 
 	user := os.Getenv("MONGO_USERNAME")
@@ -21,14 +43,39 @@ func DBinstance() (client *mongo.Client) {
 	host := os.Getenv("MONGO_HOST")
 	port := os.Getenv("MONGO_PORT")
 
-	replicaSet := "replica-set"
+	conn := fmt.Sprintf("mongodb://%s:%s@%s:%s/", user, pass, host, port)
+
+	replicaSetQueryString := "replicaSet=replica-set"
+	tlsQueryString := ""
+	var tlsConfig *tls.Config
+
 	if os.Getenv("GIN_MODE") == "release" {
-		replicaSet = "rs0"
+		replicaSetQueryString = "replicaSet=rs0"
+		tlsQueryString = "&tls=true"
+
+		// configure tls
+		var filename = "../rds-combined-ca-bundle.pem"
+		rootPEM, _ := ioutil.ReadFile(filename)
+		roots := x509.NewCertPool()
+		if ok := roots.AppendCertsFromPEM([]byte(rootPEM)); !ok {
+			fmt.Printf("get certs from %s fail!\n", filename)
+			return
+		}
+		tlsConfig = &tls.Config{
+			RootCAs:            roots,
+			InsecureSkipVerify: true,
+		}
 	}
-	conn := fmt.Sprintf("mongodb://%s:%s@%s:%s/?replicaSet=%s", user, pass, host, port, replicaSet)
+
+	conn = fmt.Sprintf("%s?%s%s", conn, replicaSetQueryString, tlsQueryString)
+
 	fmt.Printf("Attempting connection with: %s", conn)
 	serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
 	clientOptions := options.Client().ApplyURI(conn).SetServerAPIOptions(serverAPIOptions)
+	if tlsConfig != nil {
+		fmt.Println("Successfully set TLS config")
+		clientOptions.SetTLSConfig(tlsConfig)
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
