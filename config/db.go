@@ -47,29 +47,29 @@ func DBinstance() (client *mongo.Client) {
 
 	replicaSetQueryString := "replicaSet=replica-set"
 	tlsQueryString := ""
-	var tlsConfig *tls.Config
+	//var tlsConfig *tls.Config
 
 	if os.Getenv("GIN_MODE") == "release" {
 		replicaSetQueryString = "replicaSet=rs0"
-		tlsQueryString = "&tls=true"
+		//tlsQueryString = "&tls=true"
 
-		// configure tls
-		var filename = "rds-combined-ca-bundle.pem"
-		tlsConfig := new(tls.Config)
-		certs, err := ioutil.ReadFile(filename)
+		//// configure tls
+		//var filename = "rds-combined-ca-bundle.pem"
+		//tlsConfig := new(tls.Config)
+		//certs, err := ioutil.ReadFile(filename)
 
-		if err != nil {
-			fmt.Println("Failed to read CA file")
-			return
-		}
+		//if err != nil {
+		//fmt.Println("Failed to read CA file")
+		//return
+		//}
 
-		tlsConfig.RootCAs = x509.NewCertPool()
-		ok := tlsConfig.RootCAs.AppendCertsFromPEM(certs)
+		//tlsConfig.RootCAs = x509.NewCertPool()
+		//ok := tlsConfig.RootCAs.AppendCertsFromPEM(certs)
 
-		if !ok {
-			fmt.Println("Failed to append CA file")
-			return
-		}
+		//if !ok {
+		//fmt.Println("Failed to append CA file")
+		//return
+		//}
 
 	}
 
@@ -78,10 +78,10 @@ func DBinstance() (client *mongo.Client) {
 	fmt.Printf("Attempting connection with: %s", conn)
 	serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
 	clientOptions := options.Client().ApplyURI(conn).SetServerAPIOptions(serverAPIOptions)
-	if tlsConfig != nil {
-		fmt.Println("Successfully set TLS config")
-		clientOptions.SetTLSConfig(tlsConfig)
-	}
+	//if tlsConfig != nil {
+	//fmt.Println("Successfully set TLS config")
+	//clientOptions.SetTLSConfig(tlsConfig)
+	//}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
