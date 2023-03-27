@@ -111,6 +111,9 @@ definitions:
       card_type:
         example: super_miles_card
         type: string
+      user_email:
+        example: sudo@gabriel.dev
+        type: string
       value:
         example: 100
         type: number
@@ -640,6 +643,38 @@ paths:
           schema:
             $ref: '#/definitions/models.HTTPError'
       summary: Update a Card
+      tags:
+      - card
+  /card/user/{user_email}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all cards registered under the given User's email
+      parameters:
+      - description: Bearer eyJhb...
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: user's email
+        in: path
+        name: user_email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Card'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.HTTPError'
+      summary: Retrieve all Cards of given User
       tags:
       - card
   /health:
