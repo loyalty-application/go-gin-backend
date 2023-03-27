@@ -2,11 +2,7 @@ package config
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
-	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"time"
@@ -17,24 +13,6 @@ import (
 )
 
 var Client *mongo.Client = DBinstance()
-
-func getCustomTLSConfig(caFile string) (*tls.Config, error) {
-	tlsConfig := new(tls.Config)
-	certs, err := ioutil.ReadFile(caFile)
-
-	if err != nil {
-		return tlsConfig, err
-	}
-
-	tlsConfig.RootCAs = x509.NewCertPool()
-	ok := tlsConfig.RootCAs.AppendCertsFromPEM(certs)
-
-	if !ok {
-		return tlsConfig, errors.New("Failed parsing pem file")
-	}
-
-	return tlsConfig, nil
-}
 
 func DBinstance() (client *mongo.Client) {
 
