@@ -7,6 +7,7 @@ import (
 	"github.com/loyalty-application/go-gin-backend/validators"
 	"go.mongodb.org/mongo-driver/mongo"
 	"net/http"
+	"time"
 )
 
 type CampaignController struct{}
@@ -33,6 +34,33 @@ func (t CampaignController) GetCampaignId(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "Failed to retrieve campaign on campaignId"})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
+// @Summary Retrieve Active Campaign based on date
+// @Description Retrieve Active Campaign based on date
+// @Tags    campaign
+// @Accept  application/json
+// @Produce application/json
+// @Param   Authorization header string true "Bearer eyJhb..."
+// @Param   date path string true "campaign's active date"
+// @Success 200 {object} models.Campaign
+// @Failure 400 {object} models.HTTPError
+// @Router  /campaign/active/{date} [get]
+func (t CampaignController) GetActiveCampaigns(c *gin.Context) {
+
+	date := c.Param("date")
+	if err := validators.ValidateDate(c, date); err != nil {
+		return
+	}
+
+	result, err := collections.RetrieveActiveCampaigns(date)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "Failed to retrieve active campaign(s) on date"})
 		return
 	}
 
@@ -70,7 +98,6 @@ func (t CampaignController) GetCampaigns(c *gin.Context) {
 // @Failure 400 {object} models.HTTPError
 // @Router  /campaign/{user_id} [post]
 func (t CampaignController) PostCampaign(c *gin.Context) {
-	// TODO: should post campaign on merchantId
 	userId := c.Param("userId")
 	if userId == "" {
 		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid User Id"})
@@ -87,18 +114,28 @@ func (t CampaignController) PostCampaign(c *gin.Context) {
 
 	// Validation Checks
 	for _, v := range data.Campaigns {
-		startDate := v.StartDate
-		endDate := v.EndDate
+		startDate, err := time.Parse("2006-01-02 15:04", v.StartDate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Start Date" + err.Error()})
+			return
+		}
+
+		endDate, err := time.Parse("2006-01-02 15:04", v.EndDate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid End Date" + err.Error()})
+			return
+		}
+
 		cardType := v.CardType
 
 		if err := validators.ValidateStartDate(c, startDate); err != nil {
 			return
 		}
-	
+
 		if err := validators.ValidateEndDate(c, startDate, endDate); err != nil {
 			return
 		}
-	
+
 		if err := validators.ValidateCardType(c, cardType); err != nil {
 			return
 		}
@@ -137,8 +174,34 @@ func (t CampaignController) UpdateCampaign(c *gin.Context) {
 
 	data := new(models.Campaign)
 	err := c.BindJSON(data)
+	startDate, err := time.Parse("2006-01-02 15:04", data.StartDate)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Start Date" + err.Error()})
+		return
+	}
+
+	endDate, err := time.Parse("2006-01-02 15:04", data.EndDate)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid End Date" + err.Error()})
+		return
+	}
+
+	cardType := data.CardType
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Campaign Object" + err.Error()})
+		return
+	}
+
+	if err := validators.ValidateStartDate(c, startDate); err != nil {
+		return
+	}
+
+	if err := validators.ValidateEndDate(c, startDate, endDate); err != nil {
+		return
+	}
+
+	if err := validators.ValidateCardType(c, cardType); err != nil {
 		return
 	}
 

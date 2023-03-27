@@ -21,8 +21,12 @@ func DBinstance() (client *mongo.Client) {
 	host := os.Getenv("MONGO_HOST")
 	port := os.Getenv("MONGO_PORT")
 
-	conn := fmt.Sprintf("mongodb://%s:%s@%s:%s/?replicaSet=replica-set", user, pass, host, port)
+	replicaSet := "replica-set"
+	if os.Getenv("GIN_MODE") == "release" {
+		replicaSet = "rs0"
+	}
 
+	conn := fmt.Sprintf("mongodb://%s:%s@%s:%s/?replicaSet=%s", user, pass, host, port, replicaSet)
 	serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
 	clientOptions := options.Client().ApplyURI(conn).SetServerAPIOptions(serverAPIOptions)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -71,7 +75,7 @@ func InitIndexes(client *mongo.Client) {
 	cardCollection := OpenCollection(client, "cards")
 
 	cardIndexModel := mongo.IndexModel{
-		Keys: bson.D{{Key: "card_id", Value: -1}},
+		Keys:    bson.D{{Key: "card_id", Value: -1}},
 		Options: options.Index().SetUnique(true),
 	}
 

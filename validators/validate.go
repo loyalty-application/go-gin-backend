@@ -9,6 +9,17 @@ import (
 )
 
 // ValidateStartDate Validate StartDate is not before current time
+func ValidateDate(c *gin.Context, date string) error {
+	_, err := time.Parse("2006-01-02 15:04", date)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest,
+			"Invalid Date. Date must be in this format 2006-01-20 15:04."})
+		return fmt.Errorf("invalid date object")
+	}
+	return nil
+}
+
+// ValidateStartDate Validate StartDate is not before current time
 func ValidateStartDate(c *gin.Context, startDate time.Time) error {
 	if startDate.Before(time.Now()) {
 		c.JSON(http.StatusBadRequest, models.HTTPError{http.StatusBadRequest,

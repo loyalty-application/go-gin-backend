@@ -67,6 +67,13 @@ definitions:
     type: object
   models.Campaign:
     properties:
+      accepted_mccs:
+        items:
+          type: integer
+        type: array
+      bonus_rates:
+        example: 8.8
+        type: number
       campaign_id:
         example: cmp00001
         type: string
@@ -76,16 +83,14 @@ definitions:
       description:
         type: string
       end_date:
-        example: "2023-03-03T13:10:23Z"
         type: string
-      is_deleted:
-        example: false
-        type: boolean
       merchant:
         example: 7-11
         type: string
+      min_spend:
+        example: 100
+        type: number
       start_date:
-        example: "2023-03-02T13:10:23Z"
         type: string
     type: object
   models.CampaignList:
@@ -105,6 +110,9 @@ definitions:
         type: string
       card_type:
         example: super_miles_card
+        type: string
+      user_email:
+        example: sudo@gabriel.dev
         type: string
       value:
         example: 100
@@ -178,6 +186,70 @@ definitions:
         items:
           $ref: '#/definitions/models.Transaction'
         type: array
+    type: object
+  models.User:
+    properties:
+      cards:
+        items:
+          type: string
+        type: array
+      cashback:
+        type: number
+      created_at:
+        type: string
+      email:
+        type: string
+      first_name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      last_name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      miles:
+        type: number
+      password:
+        minLength: 6
+        type: string
+      phone:
+        type: string
+      points:
+        type: number
+      refresh_token:
+        type: string
+      token:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    required:
+    - email
+    - first_name
+    - last_name
+    - password
+    - phone
+    type: object
+  models.UserUpdateRequest:
+    properties:
+      cards:
+        items:
+          type: string
+        type: array
+      email:
+        type: string
+      first_name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      last_name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      password:
+        minLength: 6
+        type: string
     type: object
 info:
   contact: {}
@@ -407,6 +479,36 @@ paths:
       summary: Create Campaigns for Merchants
       tags:
       - campaign
+  /campaign/active/{date}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve Active Campaign based on date
+      parameters:
+      - description: Bearer eyJhb...
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: campaign's active date
+        in: path
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Campaign'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.HTTPError'
+      summary: Retrieve Active Campaign based on date
+      tags:
+      - campaign
   /card:
     get:
       consumes:
@@ -456,6 +558,12 @@ paths:
         name: Authorization
         required: true
         type: string
+      - description: card
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.Card'
       produces:
       - application/json
       responses:
@@ -500,6 +608,73 @@ paths:
           schema:
             $ref: '#/definitions/models.HTTPError'
       summary: Retrieve specific Card
+      tags:
+      - card
+    put:
+      consumes:
+      - application/json
+      description: Update specific Card
+      parameters:
+      - description: Bearer eyJhb...
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: card's id
+        in: path
+        name: card_id
+        required: true
+        type: string
+      - description: card
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.Card'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Card'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.HTTPError'
+      summary: Update a Card
+      tags:
+      - card
+  /card/user/{user_email}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all cards registered under the given User's email
+      parameters:
+      - description: Bearer eyJhb...
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: user's email
+        in: path
+        name: user_email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Card'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.HTTPError'
+      summary: Retrieve all Cards of given User
       tags:
       - card
   /health:
@@ -560,7 +735,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: Retrieve all transaction records
+      description: Update a Specific Transaction
       parameters:
       - description: Bearer eyJhb...
         in: header
@@ -583,7 +758,7 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/models.HTTPError'
-      summary: Retrieve Transactions of all Users
+      summary: Update Transaction
       tags:
       - transaction
   /transaction/{user_id}:
@@ -667,6 +842,118 @@ paths:
       summary: Create Transactions for User
       tags:
       - transaction
+  /user:
+    get:
+      consumes:
+      - application/json
+      description: retrieve all Registered Users
+      parameters:
+      - description: Bearer eyJhb...
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - default: 100
+        description: maximum records per page
+        in: query
+        minimum: 0
+        name: limit
+        type: integer
+      - default: 0
+        description: page of records, starts from 0
+        in: query
+        minimum: 0
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.HTTPError'
+      summary: Get all Users
+      tags:
+      - user
+  /user/{email}:
+    get:
+      consumes:
+      - application/json
+      description: retrieve Specific registered User
+      parameters:
+      - description: Bearer eyJhb...
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: email
+        in: path
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.HTTPError'
+      summary: Get a User
+      tags:
+      - user
+    put:
+      consumes:
+      - application/json
+      description: Update a specific User
+      parameters:
+      - description: Bearer eyJhb...
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: email
+        in: path
+        name: email
+        required: true
+        type: string
+      - description: card
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.HTTPError'
+      summary: Update User
+      tags:
+      - user
 securityDefinitions:
   BearerAuth:
     in: header

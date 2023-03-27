@@ -36,7 +36,7 @@ func InitRoutes() {
 
 	// enabling cors
 	config := cors.DefaultConfig()
-	config.AllowHeaders = []string{"*"}
+	config.AllowHeaders = append(config.AllowHeaders, "Authorization")
 	config.AllowAllOrigins = true
 	router.Use(cors.New(config))
 
@@ -56,6 +56,14 @@ func InitRoutes() {
 	authGroup.POST("/registration", auth.Registration)
 	authGroup.POST("/login", auth.Login)
 
+	// users
+	userGroup := v1.Group("/user")
+	userGroup.Use(middlewares.AuthMiddleware())
+	
+	userGroup.GET("", auth.GetAllUsers)
+	userGroup.GET("/:email", auth.GetSpecificUser)
+	userGroup.PUT("/:email", auth.UpdateUser)
+
 	// transaction
 	transactionGroup := v1.Group("/transaction")
 	transactionGroup.Use(middlewares.AuthMiddleware())
@@ -72,6 +80,7 @@ func InitRoutes() {
 
 	campaignGroup.GET("", campaign.GetCampaigns)
 	campaignGroup.GET("/:campaignId", campaign.GetCampaignId)
+	campaignGroup.GET("/active/:date", campaign.GetActiveCampaigns)
 	campaignGroup.POST("/:userId", campaign.PostCampaign)
 	campaignGroup.PUT("/:campaignId", campaign.UpdateCampaign)
 	campaignGroup.PUT("/:campaignId/delete", campaign.DeleteCampaign)
@@ -82,7 +91,9 @@ func InitRoutes() {
 
 	cardGroup.GET("", card.GetCards)
 	cardGroup.GET("/:cardId", card.GetSpecificCard)
+	cardGroup.GET("/user/:userEmail", card.GetCardsFromUser)
 	cardGroup.POST("", card.PostCard)
+	cardGroup.PUT("/:cardId", card.UpdateCard)
 
 	router.Run(":" + PORT)
 }

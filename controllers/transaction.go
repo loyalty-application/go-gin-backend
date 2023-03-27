@@ -11,8 +11,8 @@ import (
 
 type TransactionController struct{}
 
-// @Summary Retrieve Transactions of all Users
-// @Description Retrieve all transaction records
+// @Summary Update Transaction
+// @Description Update a Specific Transaction
 // @Tags    transaction
 // @Accept  application/json
 // @Produce application/json

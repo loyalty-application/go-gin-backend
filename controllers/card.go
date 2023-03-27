@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 
@@ -89,12 +88,43 @@ func (t CardController) GetSpecificCard(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// @Summary Retrieve all Cards of given User
+// @Description Retrieve all cards registered under the given User's email
+// @Tags    card
+// @Accept  application/json
+// @Produce application/json
+// @Param   Authorization header string true "Bearer eyJhb..."
+// @Param   user_email path string true "user's email"
+// @Success 200 {object} []models.Card
+// @Failure 400 {object} models.HTTPError
+// @Router  /card/user/{user_email} [get]
+func (t CardController) GetCardsFromUser(c *gin.Context) {
+	userEmail := c.Param("userEmail")
+	if userEmail == "" {
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "userEmail cannot be blank"})
+		return
+	}
+	
+	result, err := collections.RetrieveCardsByUser(userEmail)
+	if err != nil {
+		msg := "Failed to retrieve cards"
+		if err == mongo.ErrNoDocuments {
+			msg = "No card found with given user email"
+		}
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: msg})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
 // @Summary Create Card
 // @Description Create new Card
 // @Tags    card
 // @Accept  application/json
 // @Produce application/json
 // @Param   Authorization header string true "Bearer eyJhb..."
+// @Param   request body models.Card true "card"
 // @Success 200 {object} []models.Card
 // @Failure 400 {object} models.HTTPError
 // @Router  /card [post]
@@ -118,8 +148,6 @@ func (t CardController) PostCard(c *gin.Context) {
 	// set card value to 0.0
 	data.Value = 0.0
 
-	log.Println("Data =", data)
-
 	result, err := collections.CreateCard(*data)
 	if err != nil {
 		msg := "Failed to insert card" + err.Error()
@@ -131,4 +159,38 @@ func (t CardController) PostCard(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, result)
+}
+
+// @Summary Update a Card
+// @Description Update specific Card
+// @Tags    card
+// @Accept  application/json
+// @Produce application/json
+// @Param   Authorization header string true "Bearer eyJhb..."
+// @Param   card_id path string true "card's id"
+// @Param   request body models.Card true "card"
+// @Success 200 {object} models.Card
+// @Failure 400 {object} models.HTTPError
+// @Router  /card/{card_id} [put]
+func (t CardController) UpdateCard(c *gin.Context) {
+	cardId := c.Param("cardId")
+	if cardId == "" {	
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusBadRequest, Message: "cardId cannot be blank"})
+		return
+	}
+
+	data := new(models.CardUpdateRequest)
+	err := c.BindJSON(data)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Card Object" + err.Error()})
+		return
+	}
+
+	result, err := collections.UpdateCardPoints(cardId, *data)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Card Id doesn't exist"})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
 }
