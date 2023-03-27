@@ -43,15 +43,17 @@ func DBinstance() (client *mongo.Client) {
 	host := os.Getenv("MONGO_HOST")
 	port := os.Getenv("MONGO_PORT")
 
-	conn := fmt.Sprintf("mongodb://%s:%s@%s:%s/", user, pass, host, port)
+	conn := fmt.Sprintf("mongodb://%s:%s@%s:%s", user, pass, host, port)
 
-	replicaSetQueryString := "replicaSet=replica-set"
+	replicaSetQueryString := "/?replicaSet=replica-set"
 	tlsQueryString := ""
+	secondaryQueryString := ""
 	//var tlsConfig *tls.Config
 
 	if os.Getenv("GIN_MODE") == "release" {
-		replicaSetQueryString = "replicaSet=rs0"
+		replicaSetQueryString = "/loyalty?replicaSet=rs0"
 		//tlsQueryString = "&tls=true"
+		secondaryQueryString = "&readpreference=secondaryPreferred"
 
 		//// configure tls
 		//var filename = "rds-combined-ca-bundle.pem"
@@ -72,8 +74,7 @@ func DBinstance() (client *mongo.Client) {
 		//}
 
 	}
-
-	conn = fmt.Sprintf("%s?%s%s", conn, replicaSetQueryString, tlsQueryString)
+	conn = fmt.Sprintf("%s%s%s%s", conn, replicaSetQueryString, tlsQueryString, secondaryQueryString)
 
 	fmt.Printf("Attempting connection with: %s", conn)
 	serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
