@@ -12,6 +12,8 @@ RUN go mod download
 
 COPY . ./
 
+RUN wget https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem
+
 RUN go build -o /loyalty-application/go-gin-backend 
 
 EXPOSE 8080
