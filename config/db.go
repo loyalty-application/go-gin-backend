@@ -55,7 +55,6 @@ func DBinstance() (client *mongo.Client) {
 		//tlsQueryString = "&tls=true"
 		secondaryQueryString = "&readPreference=secondaryPreferred&retryWrites=false"
 
-		fmt.Println("Connected to DocumentDB!")
 		//// configure tls
 		//var filename = "rds-combined-ca-bundle.pem"
 		//tlsConfig := new(tls.Config)
@@ -82,7 +81,7 @@ func DBinstance() (client *mongo.Client) {
 	}
 	conn = fmt.Sprintf("%s%s%s%s", conn, replicaSetQueryString, tlsQueryString, secondaryQueryString)
 
-	fmt.Printf("Attempting connection with: %s", conn)
+	fmt.Printf("Attempting connection with: %s\n", conn)
 	//serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
 	//clientOptions := options.Client().ApplyURI(conn).SetServerAPIOptions(serverAPIOptions)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -93,9 +92,13 @@ func DBinstance() (client *mongo.Client) {
 	//if err != nil {
 	//log.Fatal(err)
 	//}
+	client, err := mongo.NewClient(options.Client().ApplyURI(conn))
+	if err != nil {
+		log.Fatalf("Failed to create client: %v", err)
+	}
 
 	fmt.Println("Connecting to MongoDB ...")
-	err := client.Connect(ctx)
+	err = client.Connect(ctx)
 	if err != nil {
 		log.Fatalf("Failed to connect to cluster: %v", err)
 	}
