@@ -53,7 +53,7 @@ func DBinstance() (client *mongo.Client) {
 	if os.Getenv("GIN_MODE") == "release" {
 		replicaSetQueryString = "/loyalty?replicaSet=rs0"
 		//tlsQueryString = "&tls=true"
-		secondaryQueryString = "&readpreference=secondaryPreferred"
+		secondaryQueryString = "&readpreference=secondaryPreferred&connect=direct&sslInsecure=true"
 
 		//// configure tls
 		//var filename = "rds-combined-ca-bundle.pem"
