@@ -54,7 +54,7 @@ func DBinstance() (client *mongo.Client) {
 		tlsQueryString = "&tls=true"
 
 		// configure tls
-		var filename = "../rds-combined-ca-bundle.pem"
+		var filename = "rds-combined-ca-bundle.pem"
 		rootPEM, _ := ioutil.ReadFile(filename)
 		roots := x509.NewCertPool()
 		if ok := roots.AppendCertsFromPEM([]byte(rootPEM)); !ok {
