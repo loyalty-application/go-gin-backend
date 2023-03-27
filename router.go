@@ -90,6 +90,7 @@ func InitRoutes() {
 
 	cardGroup.GET("", card.GetCards)
 	cardGroup.GET("/:cardId", card.GetSpecificCard)
+	cardGroup.GET("/user/:userEmail", card.GetCardsFromUser)
 	cardGroup.POST("", card.PostCard)
 	cardGroup.PUT("/:cardId", card.UpdateCard)
 

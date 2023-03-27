@@ -443,6 +443,54 @@
                 }
             }
         },
+        "/card/user/{user_email}": {
+            "get": {
+                "description": "Retrieve all cards registered under the given User's email",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "card"
+                ],
+                "summary": "Retrieve all Cards of given User",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer eyJhb...",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "user's email",
+                        "name": "user_email",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Card"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/card/{card_id}": {
             "get": {
                 "description": "Retrieve card based on its card_id",
@@ -1101,6 +1149,10 @@
                 "card_type": {
                     "type": "string",
                     "example": "super_miles_card"
+                },
+                "user_email": {
+                    "type": "string",
+                    "example": "sudo@gabriel.dev"
                 },
                 "value": {
                     "type": "number",
