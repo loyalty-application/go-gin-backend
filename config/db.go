@@ -55,16 +55,22 @@ func DBinstance() (client *mongo.Client) {
 
 		// configure tls
 		var filename = "rds-combined-ca-bundle.pem"
-		rootPEM, _ := ioutil.ReadFile(filename)
-		roots := x509.NewCertPool()
-		if ok := roots.AppendCertsFromPEM([]byte(rootPEM)); !ok {
-			fmt.Printf("get certs from %s fail!\n", filename)
+		tlsConfig := new(tls.Config)
+		certs, err := ioutil.ReadFile(filename)
+
+		if err != nil {
+			fmt.Println("Failed to read CA file")
 			return
 		}
-		tlsConfig = &tls.Config{
-			RootCAs:            roots,
-			InsecureSkipVerify: true,
+
+		tlsConfig.RootCAs = x509.NewCertPool()
+		ok := tlsConfig.RootCAs.AppendCertsFromPEM(certs)
+
+		if !ok {
+			fmt.Println("Failed to append CA file")
+			return
 		}
+
 	}
 
 	conn = fmt.Sprintf("%s?%s%s", conn, replicaSetQueryString, tlsQueryString)

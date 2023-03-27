@@ -12,7 +12,7 @@ RUN go mod download
 
 COPY . ./
 
-RUN wget -O - https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem > ./rds-combined-ca-bundle.pem
+RUN wget -O - wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem > ./rds-combined-ca-bundle.pem
 
 RUN go build -o /loyalty-application/go-gin-backend 
 
