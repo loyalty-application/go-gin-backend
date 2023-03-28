@@ -87,9 +87,9 @@ func RetrieveAllUsers(skip int64, slice int64) (result []models.User, err error)
 				log.Println("Invalid Card ValueType")
 			}
 		}
+		output = append(output, user)
 	}
 
-	log.Println("Output =", len(output))
 	return output, err
 }
 
