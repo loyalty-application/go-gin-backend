@@ -52,14 +52,13 @@ func CreateUser(user models.User) (insertionNo *mongo.InsertOneResult, err error
 	insertionNo, err = userCollection.InsertOne(ctx, user)
 
 	return insertionNo, err
-
 }
 
 func RetrieveAllUsers(skip int64, slice int64) (result []models.User, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	opts := options.Find().SetSort(bson.D{{Key: "_id", Value: 1}}).SetLimit(slice).SetSkip(skip)
+	opts := options.Find().SetSort(bson.D{{Key: "user_id", Value: 1}}).SetLimit(slice).SetSkip(skip)
 
 	cursor, err := userCollection.Find(ctx, bson.D{}, opts)
 	if err != nil {
@@ -70,7 +69,7 @@ func RetrieveAllUsers(skip int64, slice int64) (result []models.User, err error)
 		panic(err)
 	}
 
-	output := make([]models.User, len(result))
+	output := make([]models.User, 0)
 	// Calculate total points / miles / cashback
 	for _, user := range result {
 		cardIdList := user.Card
@@ -88,9 +87,9 @@ func RetrieveAllUsers(skip int64, slice int64) (result []models.User, err error)
 				log.Println("Invalid Card ValueType")
 			}
 		}
-		output = append(output, user)
 	}
 
+	log.Println("Output =", len(output))
 	return output, err
 }
 
