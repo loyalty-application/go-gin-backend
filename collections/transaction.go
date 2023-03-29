@@ -138,3 +138,43 @@ func DeleteTransaction(transactionId string) (result *mongo.UpdateResult, err er
 
 	return result, err
 }
+
+func UpdateCardPointsFromTransactions(card models.Card) (result models.Card, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	pipeline := []bson.M{
+		{"$match": bson.M{"card_id": card.CardId}},
+		{"$group": bson.M{
+			"_id": nil,
+			"totalPoints": bson.M{"$sum": "$points"},
+			"totalMiles": bson.M{"$sum": "$miles"},
+			"totalCashback": bson.M{"$sum": "$cashback"},
+		}},
+	}
+
+	cursor, err := transactionCollection.Aggregate(ctx, pipeline)
+	if err != nil {
+		log.Println(err.Error())
+		return result, err
+	}
+
+	temp := struct {
+		TotalPoints   float64 `bson:"totalPoints"`
+		TotalMiles    float64 `bson:"totalMiles"`
+		TotalCashback float64 `bson:"totalCashback"`
+	}{}
+
+	if err = cursor.Decode(&temp); err != nil {
+		log.Println(err.Error())
+		return result, err
+	}
+
+	log.Println("Struct =", temp)
+
+	card.Value += temp.TotalCashback + temp.TotalMiles + temp.TotalPoints
+
+	log.Println("Card =", card)
+
+	return card, err
+}
