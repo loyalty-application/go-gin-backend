@@ -53,7 +53,7 @@ func RetrieveAllTransactionsForUser(userId string, skip int64, slice int64) (tra
 	return transaction, err
 }
 
-func CreateTransactions(userId string, transactions models.TransactionList) (result interface{}, err error) {
+func CreateTransactions(transactions models.TransactionList) (result interface{}, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
