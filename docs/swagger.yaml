@@ -46,17 +46,8 @@ definitions:
       email:
         example: sudo@soonann.dev
         type: string
-      first_name:
-        example: Soon Ann
-        type: string
-      last_name:
-        example: Tan
-        type: string
       password:
         example: supersecret
-        type: string
-      phone:
-        example: "91234567"
         type: string
     type: object
   models.AuthRegistrationResponse:

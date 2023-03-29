@@ -23,11 +23,8 @@ type AuthLoginResponse struct {
 }
 
 type AuthRegistrationRequest struct {
-	FirstName string `json:"first_name" example:"Soon Ann"`
-	LastName  string `json:"last_name" example:"Tan"`
-	Password  string `json:"password" example:"supersecret"`
 	Email     string `json:"email" example:"sudo@soonann.dev"`
-	Phone     string `json:"phone" example:"91234567"`
+	Password  string `json:"password" example:"supersecret"`
 }
 
 type AuthRegistrationResponse struct {

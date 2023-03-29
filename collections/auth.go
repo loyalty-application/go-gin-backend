@@ -15,11 +15,11 @@ import (
 
 var userCollection *mongo.Collection = config.OpenCollection(config.Client, "users")
 
-func RetrieveUser(user models.User) (dbUser models.User, err error) {
+func RetrieveUserByEmail(email string) (dbUser models.User, err error) {
 	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
 	
-	err = userCollection.FindOne(ctx, bson.M{"email": user.Email}).Decode(&dbUser)
+	err = userCollection.FindOne(ctx, bson.M{"email": email}).Decode(&dbUser)
 
 	return dbUser, err
 
@@ -44,13 +44,17 @@ func CountUserEmail(email string) (count int64, err error) {
 	return count, err
 }
 
-func CreateUser(user models.User) (insertionNo *mongo.InsertOneResult, err error) {
+func CreateUser(user models.User) (result models.User, err error) {
 	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
 
-	insertionNo, err = userCollection.InsertOne(ctx, user)
+	filter := bson.D{{"email", user.Email}}
+	update := bson.D{{"$set", user}}
+	opts := options.Update().SetUpsert(true)
 
-	return insertionNo, err
+	_, err = userCollection.UpdateOne(ctx, filter, update, opts)
+
+	return user, err
 }
 
 func RetrieveAllUsers(skip int64, slice int64) (result []models.User, err error) {

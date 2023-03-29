@@ -139,6 +139,7 @@ func HashPassword(password string) string {
 // VerifyPassword checks the input password while verifying it with the passward in the DB.
 func VerifyPassword(userPassword string, providedPassword string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(providedPassword), []byte(userPassword))
+	log.Println(userPassword, providedPassword)
 	check := true
 
 	if err != nil {

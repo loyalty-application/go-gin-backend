@@ -1120,21 +1120,9 @@ const docTemplate = `{
                     "type": "string",
                     "example": "sudo@soonann.dev"
                 },
-                "first_name": {
-                    "type": "string",
-                    "example": "Soon Ann"
-                },
-                "last_name": {
-                    "type": "string",
-                    "example": "Tan"
-                },
                 "password": {
                     "type": "string",
                     "example": "supersecret"
-                },
-                "phone": {
-                    "type": "string",
-                    "example": "91234567"
                 }
             }
         },
