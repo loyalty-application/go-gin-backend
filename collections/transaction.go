@@ -5,13 +5,14 @@ import (
 	"log"
 	"math/rand"
 	"time"
-
+	// "github.com/loyalty-application/go-gin-backend/kafka"
 	"github.com/loyalty-application/go-gin-backend/config"
 	"github.com/loyalty-application/go-gin-backend/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"github.com/imdario/mergo"
+	// "strconv"
 )
 
 var transactionCollection *mongo.Collection = config.OpenCollection(config.Client, "transactions")
@@ -58,6 +59,7 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 
 	// convert from slice of struct to slice of interface
 	t := make([]interface{}, len(transactions.Transactions))
+	// temp := make([]models.Transaction, 0)
 	for i, v := range transactions.Transactions {
 		v.UserId = userId
 
@@ -67,12 +69,14 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 		v.Miles = rand.Float64() * 100
 
 		t[i] = v
-		// // To test 100k records in 1 transaction
-		// for j, count := 0, 0; j < 100000; j++ {
+		// To test 100k records in 1 transaction
+		// for j, count := 0, 0; j < 1000000; j++ {
+		// 	log.Println("jello")
 		// 	v.UserId = userId
 		// 	v.TransactionId = strconv.Itoa(count)
 		// 	count++
 		// 	t[j] = v
+		// 	temp = append(temp, v)
 		// }
 	}
 
@@ -90,6 +94,8 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
     if err != nil && !mongo.IsDuplicateKeyError(err) {
         panic(err)
     }
+
+
 
 	// Please don't delete the code below in case we need to reuse transactions in the future - Gabriel
 

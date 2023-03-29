@@ -177,8 +177,10 @@ func (t TransactionController) PostTransactions(c *gin.Context) {
 	for _, transaction := range data.Transactions {
 		// index is the index where we are
 		// element is the element from someSlice for where we are
-		kafka.KafkaProduce(transaction)
+		kafka.ProduceMessage(transaction)
 	}
+
+
 
 	c.JSON(http.StatusCreated, result)
 }
