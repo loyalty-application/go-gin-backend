@@ -1,4 +1,4 @@
-FROM golang:1.18-alpine
+FROM golang:alpine3.17
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ COPY . ./
 
 #RUN wget -O - https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem > ./rds-combined-ca-bundle.pem
 
-RUN go build -o /loyalty-application/go-gin-backend 
+RUN go build -o /loyalty-application/go-gin-backend
 
 EXPOSE 8080
 

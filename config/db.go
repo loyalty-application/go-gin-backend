@@ -112,6 +112,18 @@ func InitIndexes(client *mongo.Client) {
 		log.Fatal(err)
 	}
 
+	// unprocessed_unprocessed-1 index
+	unprocessedCollection := OpenCollection(client, "unprocessed")
+
+	unprocessedIndexModel := mongo.IndexModel{
+		Keys:    bson.D{{Key: "transaction_id", Value: -1}},
+		Options: options.Index().SetUnique(true),
+	}
+	unprocessedIndexCreated, err := unprocessedCollection.Indexes().CreateOne(context.Background(), unprocessedIndexModel)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// campaigns_campaigns_-1 index
 	campaignCollection := OpenCollection(client, "campaigns")
 
@@ -152,6 +164,7 @@ func InitIndexes(client *mongo.Client) {
 	}
 
 	fmt.Printf("Created Transaction Index %s\n", transactionIndexCreated)
+	fmt.Printf("Created Unprocessed Index %s\n", unprocessedIndexCreated)
 	fmt.Printf("Created Campaign Index %s\n", campaignIndexCreated)
 	fmt.Printf("Created Card Index %s\n", cardIndexCreated)
 	fmt.Printf("Created User Index %s\n", userIndexCreated)

@@ -15,6 +15,7 @@ import (
 )
 
 var transactionCollection *mongo.Collection = config.OpenCollection(config.Client, "transactions")
+var unprocessedCollection *mongo.Collection = config.OpenCollection(config.Client, "unprocessed")
 
 func RetrieveAllTransactions(skip int64, slice int64) (transaction []models.Transaction, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -59,7 +60,6 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 	// convert from slice of struct to slice of interface
 	t := make([]interface{}, len(transactions.Transactions))
 	for i, v := range transactions.Transactions {
-		v.UserId = userId
 
 		// Placeholders for testing
 		v.Points = rand.Float64() * 100
@@ -67,13 +67,7 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 		v.Miles = rand.Float64() * 100
 
 		t[i] = v
-		// // To test 100k records in 1 transaction
-		// for j, count := 0, 0; j < 100000; j++ {
-		// 	v.UserId = userId
-		// 	v.TransactionId = strconv.Itoa(count)
-		// 	count++
-		// 	t[j] = v
-		// }
+		
 	}
 
 	// convert from slice of interface to mongo's bulkWrite model
@@ -86,47 +80,10 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 	// will continue to process remaining write operations in the list.
 	bulkWriteOptions := options.BulkWrite().SetOrdered(false)
 	// log.Println("Bulk Writing", models)
-	result, err = transactionCollection.BulkWrite(ctx, models, bulkWriteOptions)
+	result, err = unprocessedCollection.BulkWrite(ctx, models, bulkWriteOptions)
     if err != nil && !mongo.IsDuplicateKeyError(err) {
         panic(err)
     }
-
-	// Please don't delete the code below in case we need to reuse transactions in the future - Gabriel
-
-
-	// // Setting write permissions
-	// wc := writeconcern.New(writeconcern.WMajority())
-	// txnOpts := options.Transaction().SetWriteConcern(wc)
-
-	// // Start new session
-	// session, err := config.Client.StartSession()
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// defer session.EndSession(context.Background())
-
-	// // Start transaction
-	// if err = session.StartTransaction(txnOpts); err != nil {
-	// 	return nil, err
-	// }
-	// log.Println("Transaction Start without errors")
-
-	// // Insert documents in the current session
-	// log.Println("Before Insert")
-	// result, err = transactionCollection.InsertMany(mongo.NewSessionContext(context.Background(),session), t)
-	// log.Println("After Insert")
-	// defer cancel()
-
-	// if err != nil {
-	// 	log.Println("Insert Many Error = ", err.Error())
-	// 	// Abort session if got error
-	// 	session.AbortTransaction(context.Background())
-	// 	// log.Println("Aborted Transaction")
-	// 	return result, err
-	// }
-
-	// // Commit documents if no error
-	// err = session.CommitTransaction(context.Background())
 
 	return result, err
 }
