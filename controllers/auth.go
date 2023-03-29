@@ -176,17 +176,17 @@ func (a AuthController) GetAllUsers(c *gin.Context) {
 // @Failure 500 {object} models.HTTPError
 // @Router  /user/{email} [get]
 func (a AuthController) GetSpecificUser(c *gin.Context) {
-	email := c.Param("email")
-	if email == "" {
-		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "email cannot be blank"})
+	userId := c.Param("userId")
+	if userId == "" {
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "userId cannot be blank"})
 		return
 	}
 
-	result, err := collections.RetrieveSpecificUser(email)
+	result, err := collections.RetrieveSpecificUser(userId)
 	if err != nil {
 		msg := "Failed to retrieve user"
 		if err == mongo.ErrNoDocuments {
-			msg = "No User found with given email"
+			msg = "No User found with given userId"
 		}
 		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: msg})
 		return
@@ -220,14 +220,14 @@ func (a AuthController) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	// Validation Check for Card Ids
-	cardList := data.Card
-	for _, cardId := range cardList {
-		if _, err = collections.RetrieveSpecificCard(cardId); err != nil {
-			c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Card with Card Id " + cardId + " doesn't exist"})
-			return
-		}
-	}
+	// // Validation Check for Card Ids
+	// cardList := data.Card
+	// for _, cardId := range cardList {
+	// 	if _, err = collections.RetrieveSpecificCard(cardId); err != nil {
+	// 		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Card with Card Id " + cardId + " doesn't exist"})
+	// 		return
+	// 	}
+	// }
 
 	// Updating
 	result, err := collections.UpdateUser(email, *data)

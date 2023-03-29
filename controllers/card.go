@@ -89,27 +89,27 @@ func (t CardController) GetSpecificCard(c *gin.Context) {
 }
 
 // @Summary Retrieve all Cards of given User
-// @Description Retrieve all cards registered under the given User's email
+// @Description Retrieve all cards registered under the given User's Id
 // @Tags    card
 // @Accept  application/json
 // @Produce application/json
 // @Param   Authorization header string true "Bearer eyJhb..."
-// @Param   user_email path string true "user's email"
+// @Param   user_id path string true "user's id"
 // @Success 200 {object} []models.Card
 // @Failure 400 {object} models.HTTPError
-// @Router  /card/user/{user_email} [get]
+// @Router  /card/user/{user_id} [get]
 func (t CardController) GetCardsFromUser(c *gin.Context) {
-	userEmail := c.Param("userEmail")
-	if userEmail == "" {
-		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "userEmail cannot be blank"})
+	userId := c.Param("userId")
+	if userId == "" {
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "userId cannot be blank"})
 		return
 	}
 	
-	result, err := collections.RetrieveCardsByUser(userEmail)
+	result, err := collections.RetrieveCardsByUser(userId)
 	if err != nil {
 		msg := "Failed to retrieve cards"
 		if err == mongo.ErrNoDocuments {
-			msg = "No card found with given user email"
+			msg = "No cards found with given user id"
 		}
 		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: msg})
 		return

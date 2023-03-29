@@ -45,7 +45,6 @@ type User struct {
 	RefreshToken *string   `json:"refresh_token" bson:"refresh_token"`
 	CreatedAt    time.Time `json:"created_at" bson:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at" bson:"updated_at"`
-	Card         []string  `json:"cards" bson:"cards"`
 	Points       float64   `json:"points" bson:"points"`
 	Miles        float64   `json:"miles" bson:"miles"`
 	Cashback     float64   `json:"cashback" bson:"cashback"`

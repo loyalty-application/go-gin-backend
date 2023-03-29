@@ -31,11 +31,11 @@ func RetrieveAllCards(skip int64, slice int64) (cards []models.Card, err error) 
 	return cards, err
 }
 
-func RetrieveCardsByUser(email string) (result []models.Card, err error) {
+func RetrieveCardsByUser(id string) (result []models.Card, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	filter := bson.D{{Key: "user_email", Value: email}}
+	filter := bson.D{{Key: "user_id", Value: id}}
 	cursor, err := cardCollection.Find(ctx, filter)
 	if err != nil {
 		return result, err

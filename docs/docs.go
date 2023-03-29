@@ -498,9 +498,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/card/user/{user_email}": {
+        "/card/user/{user_id}": {
             "get": {
-                "description": "Retrieve all cards registered under the given User's email",
+                "description": "Retrieve all cards registered under the given User's Id",
                 "consumes": [
                     "application/json"
                 ],
@@ -521,8 +521,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "user's email",
-                        "name": "user_email",
+                        "description": "user's id",
+                        "name": "user_id",
                         "in": "path",
                         "required": true
                     }
@@ -1213,9 +1213,9 @@ const docTemplate = `{
                     "type": "string",
                     "example": "super_miles_card"
                 },
-                "user_email": {
+                "user_id": {
                     "type": "string",
-                    "example": "sudo@gabriel.dev"
+                    "example": "12345"
                 },
                 "value": {
                     "type": "number",
@@ -1329,12 +1329,6 @@ const docTemplate = `{
                 "phone"
             ],
             "properties": {
-                "cards": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "cashback": {
                     "type": "number"
                 },

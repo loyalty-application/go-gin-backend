@@ -61,7 +61,7 @@ func InitRoutes() {
 	userGroup.Use(middlewares.AuthMiddleware())
 	
 	userGroup.GET("", auth.GetAllUsers)
-	userGroup.GET("/:email", auth.GetSpecificUser)
+	userGroup.GET("/:userId", auth.GetSpecificUser)
 	userGroup.PUT("/:email", auth.UpdateUser)
 
 	// transaction
@@ -91,7 +91,7 @@ func InitRoutes() {
 
 	cardGroup.GET("", card.GetCards)
 	cardGroup.GET("/:cardId", card.GetSpecificCard)
-	cardGroup.GET("/user/:userEmail", card.GetCardsFromUser)
+	cardGroup.GET("/user/:userId", card.GetCardsFromUser)
 	cardGroup.POST("", card.PostCard)
 	cardGroup.PUT("/:cardId", card.UpdateCard)
 

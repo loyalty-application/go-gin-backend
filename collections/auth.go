@@ -2,7 +2,6 @@ package collections
 
 import (
 	"context"
-	"errors"
 	"log"
 	"time"
 
@@ -17,9 +16,9 @@ import (
 var userCollection *mongo.Collection = config.OpenCollection(config.Client, "users")
 
 func RetrieveUser(user models.User) (dbUser models.User, err error) {
-
 	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
+	
 	err = userCollection.FindOne(ctx, bson.M{"email": user.Email}).Decode(&dbUser)
 
 	return dbUser, err
@@ -72,9 +71,12 @@ func RetrieveAllUsers(skip int64, slice int64) (result []models.User, err error)
 	output := make([]models.User, 0)
 	// Calculate total points / miles / cashback
 	for _, user := range result {
-		cardIdList := user.Card
-		cardList, _ := RetrieveListOfCards(cardIdList)
+		cardList, err := RetrieveCardsByUser(*user.UserID)
+		if err != nil {
+			continue
+		}
 
+		// calculations
 		for _, card := range cardList {
 			switch card.ValueType {
 			case "Miles":
@@ -87,17 +89,18 @@ func RetrieveAllUsers(skip int64, slice int64) (result []models.User, err error)
 				log.Println("Invalid Card ValueType")
 			}
 		}
+
 		output = append(output, user)
 	}
 
 	return output, err
 }
 
-func RetrieveSpecificUser(email string) (result models.User, err error) {
+func RetrieveSpecificUser(userId string) (result models.User, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	filter := bson.D{{Key: "email", Value: email}}
+	filter := bson.D{{Key: "user_id", Value: userId}}
 
 	err = userCollection.FindOne(ctx, filter).Decode(&result)
 	if err != nil {
@@ -105,21 +108,24 @@ func RetrieveSpecificUser(email string) (result models.User, err error) {
 	}
 
 	// Calculate total points / miles / cashback
-	cardIdList := result.Card
-	cardList, err := RetrieveListOfCards(cardIdList)
-
-	for _, card := range cardList {
-		switch card.ValueType {
-		case "Miles":
-			result.Miles += card.Value
-		case "Points":
-			result.Points += card.Value
-		case "Cashback":
-			result.Cashback += card.Value
-		default:
-			log.Println("Invalid Card ValueType")
+	cardList, err := RetrieveCardsByUser(*result.UserID)
+		if err != nil {
+			return result, err
 		}
-	}
+
+		// calculations
+		for _, card := range cardList {
+			switch card.ValueType {
+			case "Miles":
+				result.Miles += card.Value
+			case "Points":
+				result.Points += card.Value
+			case "Cashback":
+				result.Cashback += card.Value
+			default:
+				log.Println("Invalid Card ValueType")
+			}
+		}
 
 	return result, err
 }
@@ -135,17 +141,17 @@ func UpdateUser(email string, user models.User) (result *mongo.UpdateResult, err
 		return nil, err
 	}
 
-	// Check to see if user already has card
-	for _, i := range user.Card {
-		for _, j := range initialUser.Card {
-			if i == j {
-				return nil, errors.New("User already has Card with given CardId")
-			}
-		}
-	}
+	// // Check to see if user already has card
+	// for _, i := range user.Card {
+	// 	for _, j := range initialUser.Card {
+	// 		if i == j {
+	// 			return nil, errors.New("User already has Card with given CardId")
+	// 		}
+	// 	}
+	// }
 	
-	// Update original data with changed fields in transaction
-	user.Card = append(user.Card, initialUser.Card...)
+	// // Update original data with changed fields in transaction
+	// user.Card = append(user.Card, initialUser.Card...)
 	if err := mergo.Merge(&initialUser, user, mergo.WithOverride); err != nil {
 		return nil, err
 	}
@@ -155,8 +161,7 @@ func UpdateUser(email string, user models.User) (result *mongo.UpdateResult, err
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: "first_name", Value: initialUser.FirstName},
 		{Key: "last_name", Value: initialUser.LastName},
 		{Key: "password", Value: initialUser.Password},
-		{Key: "email", Value: initialUser.Email},
-		{Key: "cards", Value: initialUser.Card}}}}
+		{Key: "email", Value: initialUser.Email}}}}
 
 	log.Println(initialUser)
 
