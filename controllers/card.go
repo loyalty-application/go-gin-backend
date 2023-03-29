@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 	"strconv"
+	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/loyalty-application/go-gin-backend/collections"
@@ -105,7 +106,8 @@ func (t CardController) GetCardsFromUser(c *gin.Context) {
 		return
 	}
 	
-	result, err := collections.RetrieveCardsByUser(userId)
+	// Get Cards by User
+	cards, err := collections.RetrieveCardsByUser(userId)
 	if err != nil {
 		msg := "Failed to retrieve cards"
 		if err == mongo.ErrNoDocuments {
@@ -115,6 +117,17 @@ func (t CardController) GetCardsFromUser(c *gin.Context) {
 		return
 	}
 
+	result := make([]models.Card, 0)
+
+	// Update Card Values From Transaction
+	// TODO See if it's possible to change method to take in array of cards instead
+	for _, card := range cards {
+		updatedCard, err := collections.UpdateCardPointsFromTransactions(card)
+		if err != nil {
+			log.Println(err.Error())
+		}
+		result = append(result, updatedCard)
+	}
 	c.JSON(http.StatusOK, result)
 }
 

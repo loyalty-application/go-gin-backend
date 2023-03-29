@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 	"strconv"
+	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/loyalty-application/go-gin-backend/collections"
@@ -154,23 +155,17 @@ func (t TransactionController) GetTransactionsForUser(c *gin.Context) {
 // @Failure 400 {object} models.HTTPError
 // @Router  /transaction/{user_id} [post]
 func (t TransactionController) PostTransactions(c *gin.Context) {
-	userId := c.Param("userId")
-	if userId == "" {
-		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid User Id"})
-		return
-	}
-
 	data := new(models.TransactionList)
 	err := c.BindJSON(data)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Transaction Object" + err.Error()})
 		return
 	}
-
-	result, err := collections.CreateTransactions(userId, *data)
+	log.Println("Hello World")
+	result, err := collections.CreateTransactions(*data)
 	if err != nil {
-		msg := "Invalid Transactions"
-		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: msg})
+		// msg := "Invalid Transactions"
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: err.Error()})
 		return
 	}
 

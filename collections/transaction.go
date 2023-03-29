@@ -16,6 +16,7 @@ import (
 )
 
 var transactionCollection *mongo.Collection = config.OpenCollection(config.Client, "transactions")
+var unprocessedCollection *mongo.Collection = config.OpenCollection(config.Client, "unprocessed")
 
 func RetrieveAllTransactions(skip int64, slice int64) (transaction []models.Transaction, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -53,7 +54,7 @@ func RetrieveAllTransactionsForUser(userId string, skip int64, slice int64) (tra
 	return transaction, err
 }
 
-func CreateTransactions(userId string, transactions models.TransactionList) (result interface{}, err error) {
+func CreateTransactions(transactions models.TransactionList) (result interface{}, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -61,7 +62,6 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 	t := make([]interface{}, len(transactions.Transactions))
 	// temp := make([]models.Transaction, 0)
 	for i, v := range transactions.Transactions {
-		v.UserId = userId
 
 		// Placeholders for testing
 		v.Points = rand.Float64() * 100
@@ -90,49 +90,10 @@ func CreateTransactions(userId string, transactions models.TransactionList) (res
 	// will continue to process remaining write operations in the list.
 	bulkWriteOptions := options.BulkWrite().SetOrdered(false)
 	// log.Println("Bulk Writing", models)
-	result, err = transactionCollection.BulkWrite(ctx, models, bulkWriteOptions)
+	result, err = unprocessedCollection.BulkWrite(ctx, models, bulkWriteOptions)
     if err != nil && !mongo.IsDuplicateKeyError(err) {
         panic(err)
     }
-
-
-
-	// Please don't delete the code below in case we need to reuse transactions in the future - Gabriel
-
-
-	// // Setting write permissions
-	// wc := writeconcern.New(writeconcern.WMajority())
-	// txnOpts := options.Transaction().SetWriteConcern(wc)
-
-	// // Start new session
-	// session, err := config.Client.StartSession()
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// defer session.EndSession(context.Background())
-
-	// // Start transaction
-	// if err = session.StartTransaction(txnOpts); err != nil {
-	// 	return nil, err
-	// }
-	// log.Println("Transaction Start without errors")
-
-	// // Insert documents in the current session
-	// log.Println("Before Insert")
-	// result, err = transactionCollection.InsertMany(mongo.NewSessionContext(context.Background(),session), t)
-	// log.Println("After Insert")
-	// defer cancel()
-
-	// if err != nil {
-	// 	log.Println("Insert Many Error = ", err.Error())
-	// 	// Abort session if got error
-	// 	session.AbortTransaction(context.Background())
-	// 	// log.Println("Aborted Transaction")
-	// 	return result, err
-	// }
-
-	// // Commit documents if no error
-	// err = session.CommitTransaction(context.Background())
 
 	return result, err
 }
@@ -186,4 +147,43 @@ func DeleteTransaction(transactionId string) (result *mongo.UpdateResult, err er
 	}
 
 	return result, err
+}
+
+func UpdateCardPointsFromTransactions(card models.Card) (result models.Card, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	pipeline := []bson.M{
+		{"$match": bson.M{"card_id": card.CardId}},
+		{"$group": bson.M{
+			"_id": nil,
+			"totalPoints": bson.M{"$sum": "$points"},
+			"totalMiles": bson.M{"$sum": "$miles"},
+			"totalCashback": bson.M{"$sum": "$cashback"},
+		}},
+	}
+	
+	cursor, err := transactionCollection.Aggregate(ctx, pipeline)
+	if err != nil {
+		log.Println(err.Error())
+		return result, err
+	}
+	
+	var temp struct {
+		TotalPoints   float64 `bson:"totalPoints"`
+		TotalMiles    float64 `bson:"totalMiles"`
+		TotalCashback float64 `bson:"totalCashback"`
+	}
+
+	if cursor.Next(context.Background()) {
+        
+		if err = cursor.Decode(&temp); err != nil {
+			log.Println(err.Error())
+			return result, err
+		}
+	}
+
+	card.Value += temp.TotalCashback + temp.TotalMiles + temp.TotalPoints
+
+	return card, err
 }
