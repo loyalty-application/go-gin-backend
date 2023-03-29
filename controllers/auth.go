@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -10,7 +11,6 @@ import (
 	"github.com/loyalty-application/go-gin-backend/collections"
 	"github.com/loyalty-application/go-gin-backend/models"
 	"github.com/loyalty-application/go-gin-backend/services"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -49,8 +49,8 @@ func (a AuthController) Login(c *gin.Context) {
 		return
 	}
 
-	token, refreshToken, _ := services.GenerateAllTokens(*dbUser.Email, *dbUser.FirstName, *dbUser.LastName, dbUser.UserID.Hex())
-	services.UpdateAllTokens(token, refreshToken, dbUser.UserID.Hex())
+	token, refreshToken, _ := services.GenerateAllTokens(*dbUser.Email, *dbUser.FirstName, *dbUser.LastName, *dbUser.UserID)
+	services.UpdateAllTokens(token, refreshToken, *dbUser.UserID)
 
 	c.JSON(http.StatusOK, dbUser)
 
@@ -74,7 +74,9 @@ func (a AuthController) Registration(c *gin.Context) {
 	}
 
 	validationErr := validate.Struct(user)
+	log.Println(user)
 	if validationErr != nil {
+		log.Println(validationErr)
 		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Registration Request"})
 		return
 	}
@@ -97,8 +99,7 @@ func (a AuthController) Registration(c *gin.Context) {
 	user.UpdatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 
 	// generate token for user
-	user.UserID = primitive.NewObjectID()
-	token, refreshToken, _ := services.GenerateAllTokens(*user.Email, *user.FirstName, *user.LastName, user.UserID.Hex())
+	token, refreshToken, _ := services.GenerateAllTokens(*user.Email, *user.FirstName, *user.LastName, *user.UserID)
 
 	user.Token = &token
 	user.RefreshToken = &refreshToken
@@ -111,7 +112,6 @@ func (a AuthController) Registration(c *gin.Context) {
 
 	// TODO: change to proper request instead of mongodb's successful insertion format
 	c.JSON(http.StatusOK, result)
-
 }
 
 // @Summary Get all Users
@@ -176,17 +176,17 @@ func (a AuthController) GetAllUsers(c *gin.Context) {
 // @Failure 500 {object} models.HTTPError
 // @Router  /user/{email} [get]
 func (a AuthController) GetSpecificUser(c *gin.Context) {
-	email := c.Param("email")
-	if email == "" {
-		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "email cannot be blank"})
+	userId := c.Param("userId")
+	if userId == "" {
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "userId cannot be blank"})
 		return
 	}
 
-	result, err := collections.RetrieveSpecificUser(email)
+	result, err := collections.RetrieveSpecificUser(userId)
 	if err != nil {
 		msg := "Failed to retrieve user"
 		if err == mongo.ErrNoDocuments {
-			msg = "No User found with given email"
+			msg = "No User found with given userId"
 		}
 		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: msg})
 		return
@@ -220,14 +220,14 @@ func (a AuthController) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	// Validation Check for Card Ids
-	cardList := data.Card
-	for _, cardId := range cardList {
-		if _, err = collections.RetrieveSpecificCard(cardId); err != nil {
-			c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Card with Card Id " + cardId + " doesn't exist"})
-			return
-		}
-	}
+	// // Validation Check for Card Ids
+	// cardList := data.Card
+	// for _, cardId := range cardList {
+	// 	if _, err = collections.RetrieveSpecificCard(cardId); err != nil {
+	// 		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Card with Card Id " + cardId + " doesn't exist"})
+	// 		return
+	// 	}
+	// }
 
 	// Updating
 	result, err := collections.UpdateUser(email, *data)

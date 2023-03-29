@@ -111,8 +111,8 @@ definitions:
       card_type:
         example: super_miles_card
         type: string
-      user_email:
-        example: sudo@gabriel.dev
+      user_id:
+        example: "12345"
         type: string
       value:
         example: 100
@@ -189,10 +189,6 @@ definitions:
     type: object
   models.User:
     properties:
-      cards:
-        items:
-          type: string
-        type: array
       cashback:
         type: number
       created_at:
@@ -645,20 +641,20 @@ paths:
       summary: Update a Card
       tags:
       - card
-  /card/user/{user_email}:
+  /card/user/{user_id}:
     get:
       consumes:
       - application/json
-      description: Retrieve all cards registered under the given User's email
+      description: Retrieve all cards registered under the given User's Id
       parameters:
       - description: Bearer eyJhb...
         in: header
         name: Authorization
         required: true
         type: string
-      - description: user's email
+      - description: user's id
         in: path
-        name: user_email
+        name: user_id
         required: true
         type: string
       produces:
