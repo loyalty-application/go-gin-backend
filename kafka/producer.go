@@ -1,18 +1,19 @@
 package kafka
 
 import (
+	"encoding/json"
 	"fmt"
-	"math/rand"
 	"os"
-
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/loyalty-application/go-gin-backend/models"
 )
 
-func main() {
+func KafkaProduce(t models.Transaction) {
 	server := os.Getenv("KAFKA_BOOTSTRAP_SERVER")
-	topic := "purchases"
+	topic := os.Getenv("KAFKA_TOPIC")
 	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": server})
 
+	
 	if err != nil {
 		fmt.Printf("Failed to create producer: %s", err)
 		os.Exit(1)
@@ -34,18 +35,14 @@ func main() {
 		}
 	}()
 
-	users := [...]string{"eabara", "jsmith", "sgarcia", "jbernard", "htanaka", "awalther"}
-	items := [...]string{"book", "alarm clock", "t-shirts", "gift card", "batteries"}
+	key := t.CardId
+	data,_ := json.Marshal(t)
 
-	for n := 0; n < 10; n++ {
-		key := users[rand.Intn(len(users))]
-		data := items[rand.Intn(len(items))]
-		p.Produce(&kafka.Message{
-			TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-			Key:            []byte(key),
-			Value:          []byte(data),
-		}, nil)
-	}
+	p.Produce(&kafka.Message{
+		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
+		Key:            []byte(key),
+		Value:          data,
+	}, nil)
 
 	// Wait for all messages to be delivered
 	p.Flush(15 * 1000)
