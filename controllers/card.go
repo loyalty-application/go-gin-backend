@@ -105,7 +105,8 @@ func (t CardController) GetCardsFromUser(c *gin.Context) {
 		return
 	}
 	
-	result, err := collections.RetrieveCardsByUser(userId)
+	// Get Cards by User
+	cards, err := collections.RetrieveCardsByUser(userId)
 	if err != nil {
 		msg := "Failed to retrieve cards"
 		if err == mongo.ErrNoDocuments {
@@ -113,6 +114,16 @@ func (t CardController) GetCardsFromUser(c *gin.Context) {
 		}
 		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: msg})
 		return
+	}
+
+	result := make([]models.Card, 0)
+
+	// Update Card Values From Transaction
+	// TODO See if it's possible to change method to take in array of cards instead
+	for _, card := range cards {
+		if updatedCard, err := collections.UpdateCardPointsFromTransactions(card); err != nil {
+			result = append(result, updatedCard)
+		}
 	}
 
 	c.JSON(http.StatusOK, result)
