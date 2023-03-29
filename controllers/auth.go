@@ -1,10 +1,9 @@
 package controllers
 
 import (
-	"log"
 	"net/http"
 	"strconv"
-	"time"
+	// "time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator"
@@ -37,9 +36,13 @@ func (a AuthController) Login(c *gin.Context) {
 		return
 	}
 
-	dbUser, err := collections.RetrieveUser(user)
+	dbUser, err := collections.RetrieveUserByEmail(*user.Email)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Login"})
+		return
+	}
+	if dbUser.Password == nil {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "User account has not been created"})
 		return
 	}
 
@@ -67,36 +70,22 @@ func (a AuthController) Login(c *gin.Context) {
 // @Failure 500 {object} models.HTTPError
 // @Router  /auth/registration [post]
 func (a AuthController) Registration(c *gin.Context) {
-	var user models.User
-	if err := c.BindJSON(&user); err != nil {
+	var registration models.AuthRegistrationRequest
+	if err := c.BindJSON(&registration); err != nil {
 		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Registration Request"})
 		return
 	}
 
-	validationErr := validate.Struct(user)
-	log.Println(user)
-	if validationErr != nil {
-		log.Println(validationErr)
-		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Registration Request"})
+	user, err := collections.RetrieveUserByEmail(registration.Email)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "User with given Email doesn't exist"})
 		return
 	}
 
-	count, err := collections.CountUserEmail(*user.Email)
-	if err != nil || count > 0 {
-		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Email already exists"})
-		return
-	}
-
-	count, err = collections.CountUserPhone(*user.Phone)
-	if err != nil || count > 0 {
-		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Phone number already exists"})
-		return
-	}
-
-	password := services.HashPassword(*user.Password)
+	password := services.HashPassword(registration.Password)
 	user.Password = &password
-	user.CreatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-	user.UpdatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	// user.CreatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	// user.UpdatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 
 	// generate token for user
 	token, refreshToken, _ := services.GenerateAllTokens(*user.Email, *user.FirstName, *user.LastName, *user.UserID)
