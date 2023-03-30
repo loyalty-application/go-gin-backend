@@ -1289,10 +1289,6 @@ const docTemplate = `{
                 "transaction_id": {
                     "type": "string",
                     "example": "txn00001"
-                },
-                "user_id": {
-                    "type": "string",
-                    "example": "6400a..."
                 }
             }
         },
