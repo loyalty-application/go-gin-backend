@@ -144,8 +144,8 @@ definitions:
         example: USD
         type: string
       id:
-        example: 1
-        type: integer
+        example: "1"
+        type: string
       is_deleted:
         example: false
         type: boolean

@@ -1259,8 +1259,8 @@ const docTemplate = `{
                     "example": "USD"
                 },
                 "id": {
-                    "type": "integer",
-                    "example": 1
+                    "type": "string",
+                    "example": "1"
                 },
                 "is_deleted": {
                     "type": "boolean",
