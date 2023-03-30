@@ -133,7 +133,18 @@ func (t TransactionController) GetTransactionsForUser(c *gin.Context) {
 	}
 
 	skipInt := pageInt * limitInt
-	result, err := collections.RetrieveAllTransactionsForUser(userId, skipInt, limitInt)
+	cardList, err := collections.RetrieveCardsByUser(userId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "User doesn't have any cards"})
+		return
+	}
+
+	cardIdList := make([]string, len(cardList))
+	for i, card := range cardList {
+		cardIdList[i] = card.CardId
+	}
+
+	result, err := collections.RetrieveAllTransactionsForUser(cardIdList, skipInt, limitInt)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "Failed to retrieve transactions"})
 		return
