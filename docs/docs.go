@@ -1259,8 +1259,8 @@ const docTemplate = `{
                     "example": "USD"
                 },
                 "id": {
-                    "type": "integer",
-                    "example": 1
+                    "type": "string",
+                    "example": "1"
                 },
                 "is_deleted": {
                     "type": "boolean",
@@ -1289,10 +1289,6 @@ const docTemplate = `{
                 "transaction_id": {
                     "type": "string",
                     "example": "txn00001"
-                },
-                "user_id": {
-                    "type": "string",
-                    "example": "6400a..."
                 }
             }
         },
