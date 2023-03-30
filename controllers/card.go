@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 	"strconv"
+	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/loyalty-application/go-gin-backend/collections"
@@ -121,11 +122,12 @@ func (t CardController) GetCardsFromUser(c *gin.Context) {
 	// Update Card Values From Transaction
 	// TODO See if it's possible to change method to take in array of cards instead
 	for _, card := range cards {
-		if updatedCard, err := collections.UpdateCardPointsFromTransactions(card); err != nil {
-			result = append(result, updatedCard)
+		updatedCard, err := collections.UpdateCardPointsFromTransactions(card)
+		if err != nil {
+			log.Println(err.Error())
 		}
+		result = append(result, updatedCard)
 	}
-
 	c.JSON(http.StatusOK, result)
 }
 

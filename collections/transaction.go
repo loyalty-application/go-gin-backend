@@ -53,7 +53,7 @@ func RetrieveAllTransactionsForUser(cardIdList []string, skip int64, slice int64
 	return transaction, err
 }
 
-func CreateTransactions(userId string, transactions models.TransactionList) (result interface{}, err error) {
+func CreateTransactions(transactions models.TransactionList) (result interface{}, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -152,29 +152,28 @@ func UpdateCardPointsFromTransactions(card models.Card) (result models.Card, err
 			"totalCashback": bson.M{"$sum": "$cashback"},
 		}},
 	}
-
+	
 	cursor, err := transactionCollection.Aggregate(ctx, pipeline)
 	if err != nil {
 		log.Println(err.Error())
 		return result, err
 	}
-
-	temp := struct {
+	
+	var temp struct {
 		TotalPoints   float64 `bson:"totalPoints"`
 		TotalMiles    float64 `bson:"totalMiles"`
 		TotalCashback float64 `bson:"totalCashback"`
-	}{}
-
-	if err = cursor.Decode(&temp); err != nil {
-		log.Println(err.Error())
-		return result, err
 	}
 
-	log.Println("Struct =", temp)
+	if cursor.Next(context.Background()) {
+        
+		if err = cursor.Decode(&temp); err != nil {
+			log.Println(err.Error())
+			return result, err
+		}
+	}
 
 	card.Value += temp.TotalCashback + temp.TotalMiles + temp.TotalPoints
-
-	log.Println("Card =", card)
 
 	return card, err
 }
