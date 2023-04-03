@@ -55,3 +55,9 @@ type UserUpdateRequest struct {
 	Email     *string  `json:"email" bson:"email" validate:"email"`
 	Card      []string `json:"cards" bson:"cards"`
 }
+
+type UserCreateRequest struct {
+	Email        *string   `json:"email" bson:"email" validate:"email,required"`
+	Password     *string   `json:"password" bson:"password" validate:"required,min=6"`
+	UserType     *string   `json:"user_type" bson:"user_type" validate:"required,eq=ADMIN|eq=USER"`
+}

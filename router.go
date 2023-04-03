@@ -62,6 +62,7 @@ func InitRoutes() {
 	
 	userGroup.GET("", auth.GetAllUsers)
 	userGroup.GET("/:userId", auth.GetSpecificUser)
+	userGroup.POST("", auth.PostAccount)
 	userGroup.PUT("/:email", auth.UpdateUser)
 
 	// transaction
