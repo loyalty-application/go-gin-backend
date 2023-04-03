@@ -23,8 +23,8 @@ type AuthLoginResponse struct {
 }
 
 type AuthRegistrationRequest struct {
-	Email     string `json:"email" example:"sudo@soonann.dev"`
-	Password  string `json:"password" example:"supersecret"`
+	Email    string `json:"email" example:"sudo@soonann.dev"`
+	Password string `json:"password" example:"supersecret"`
 }
 
 type AuthRegistrationResponse struct {
@@ -40,6 +40,7 @@ type User struct {
 	Phone        *string   `json:"phone" bson:"phone" validate:"required"`
 	Token        *string   `json:"token" bson:"token"`
 	RefreshToken *string   `json:"refresh_token" bson:"refresh_token"`
+	UserType     *string   `json:"user_type" bson:"user_type"`
 	CreatedAt    time.Time `json:"created_at" bson:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at" bson:"updated_at"`
 	Points       float64   `json:"points" bson:"points"`

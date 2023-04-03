@@ -208,6 +208,8 @@ definitions:
         type: string
       user_id:
         type: string
+      user_type:
+        type: string
     required:
     - email
     - first_name

@@ -1356,6 +1356,9 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "type": "string"
+                },
+                "user_type": {
+                    "type": "string"
                 }
             }
         },

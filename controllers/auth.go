@@ -92,10 +92,12 @@ func (a AuthController) Registration(c *gin.Context) {
 
 	user.Token = &token
 	user.RefreshToken = &refreshToken
+	userType := "user"
+	user.UserType = &userType
 
 	result, err := collections.CreateUser(user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusBadRequest, Message: "User was not created"})
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusBadRequest, Message: err.Error()})
 		return
 	}
 
