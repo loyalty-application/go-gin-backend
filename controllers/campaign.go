@@ -98,15 +98,9 @@ func (t CampaignController) GetCampaigns(c *gin.Context) {
 // @Failure 400 {object} models.HTTPError
 // @Router  /campaign/{user_id} [post]
 func (t CampaignController) PostCampaign(c *gin.Context) {
-	userId := c.Param("userId")
-	if userId == "" {
-		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid User Id"})
-		return
-	}
 
 	data := new(models.CampaignList)
 	err := c.BindJSON(data)
-
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Campaign Object" + err.Error()})
 		return
@@ -141,7 +135,7 @@ func (t CampaignController) PostCampaign(c *gin.Context) {
 		}
 	}
 
-	_, err = collections.CreateCampaign(userId, *data)
+	_, err = collections.CreateCampaign(*data)
 	if err != nil {
 		msg := "Invalid Campaign"
 		if mongo.IsDuplicateKeyError(err) {
