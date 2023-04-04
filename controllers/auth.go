@@ -3,6 +3,8 @@ package controllers
 import (
 	"net/http"
 	"strconv"
+	"time"
+
 	// "time"
 
 	"github.com/gin-gonic/gin"
@@ -92,14 +94,66 @@ func (a AuthController) Registration(c *gin.Context) {
 
 	user.Token = &token
 	user.RefreshToken = &refreshToken
+	userType := "USER"
+	user.UserType = &userType
 
 	result, err := collections.CreateUser(user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusBadRequest, Message: "User was not created"})
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusBadRequest, Message: err.Error()})
 		return
 	}
 
 	// TODO: change to proper request instead of mongodb's successful insertion format
+	c.JSON(http.StatusOK, result)
+}
+
+// @Summary Create an Account
+// @Description Endpoint for Superadmin to create Users / Admin
+// @Tags    user
+// @Accept  application/json
+// @Produce application/json
+// @Param request body models.UserCreateRequest true "Registration"
+// @Success 200 {object} models.User
+// @Failure 400 {object} models.HTTPError
+// @Failure 500 {object} models.HTTPError
+// @Router  /auth/registration [post]
+func (a AuthController) PostAccount(c *gin.Context) {
+	var userCreateRequest models.UserCreateRequest
+	if err := c.BindJSON(&userCreateRequest); err != nil {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Invalid Create Request"})
+		return
+	}
+	validate.Struct(userCreateRequest)
+
+	if _, err := collections.RetrieveUserByEmail(*userCreateRequest.Email); err == nil {
+		c.JSON(http.StatusBadRequest, models.HTTPError{Code: http.StatusBadRequest, Message: "Account with given Email already exist"})
+		return
+	}
+
+	password := services.HashPassword(*userCreateRequest.Password)
+	user := models.User{
+		Email: userCreateRequest.Email,
+		UserType: userCreateRequest.UserType,
+		Password: &password,
+	}
+
+	user.CreatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	user.UpdatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+
+	// generate token for user
+	token, refreshToken, _ := services.GenerateAllTokens(*user.Email, *user.FirstName, *user.LastName, *user.UserID)
+
+	user.Token = &token
+	user.RefreshToken = &refreshToken
+	userType := "USER"
+	user.UserType = &userType
+
+	result, err := collections.CreateUser(user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusBadRequest, Message: err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, result)
 }
 

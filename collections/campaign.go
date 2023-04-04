@@ -65,14 +65,13 @@ func RetrieveAllCampaigns() (campaigns []models.Campaign, err error) {
 	return campaigns, err
 }
 
-func CreateCampaign(userId string, campaigns models.CampaignList) (result *mongo.InsertManyResult, err error) {
+func CreateCampaign(campaigns models.CampaignList) (result *mongo.InsertManyResult, err error) {
 	_, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	// convert from slice of struct to slice of interface
 	t := make([]interface{}, len(campaigns.Campaigns))
 	for i, v := range campaigns.Campaigns {
-		v.UserId = userId
 		t[i] = v
 	}
 

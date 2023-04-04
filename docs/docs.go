@@ -57,7 +57,7 @@ const docTemplate = `{
         },
         "/auth/registration": {
             "post": {
-                "description": "Registration endpoint for user new users to register for an account, after registering for an account, the user will be able to login to the system and obtain a JWT Token",
+                "description": "Endpoint for Superadmin to create Users / Admin",
                 "consumes": [
                     "application/json"
                 ],
@@ -65,9 +65,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "authentication"
+                    "user"
                 ],
-                "summary": "Registration",
+                "summary": "Create an Account",
                 "parameters": [
                     {
                         "description": "Registration",
@@ -75,7 +75,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.AuthRegistrationRequest"
+                            "$ref": "#/definitions/models.UserCreateRequest"
                         }
                     }
                 ],
@@ -83,7 +83,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.AuthRegistrationResponse"
+                            "$ref": "#/definitions/models.User"
                         }
                     },
                     "400": {
@@ -711,6 +711,44 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/models.Transaction"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/transaction/count": {
+            "get": {
+                "description": "Counts the total records in the db",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transaction"
+                ],
+                "summary": "Counts the total records in the db",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer eyJhb...",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "integer"
                         }
                     },
                     "400": {
@@ -1354,6 +1392,29 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_id": {
+                    "type": "string"
+                },
+                "user_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UserCreateRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "password",
+                "user_type"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 6
+                },
+                "user_type": {
                     "type": "string"
                 }
             }

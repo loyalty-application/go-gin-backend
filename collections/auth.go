@@ -2,6 +2,7 @@ package collections
 
 import (
 	"context"
+	"errors"
 	"log"
 	"time"
 
@@ -50,9 +51,11 @@ func CreateUser(user models.User) (result models.User, err error) {
 
 	filter := bson.D{{"email", user.Email}}
 	update := bson.D{{"$set", user}}
-	opts := options.Update().SetUpsert(true)
 
-	_, err = userCollection.UpdateOne(ctx, filter, update, opts)
+	updateResult, err := userCollection.UpdateOne(ctx, filter, update)
+	if updateResult.MatchedCount == 0 {
+		return result, errors.New("Email Not Found")
+	}
 
 	return user, err
 }

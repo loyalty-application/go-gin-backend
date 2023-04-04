@@ -208,12 +208,28 @@ definitions:
         type: string
       user_id:
         type: string
+      user_type:
+        type: string
     required:
     - email
     - first_name
     - last_name
     - password
     - phone
+    type: object
+  models.UserCreateRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      user_type:
+        type: string
+    required:
+    - email
+    - password
+    - user_type
     type: object
   models.UserUpdateRequest:
     properties:
@@ -271,23 +287,21 @@ paths:
     post:
       consumes:
       - application/json
-      description: Registration endpoint for user new users to register for an account,
-        after registering for an account, the user will be able to login to the system
-        and obtain a JWT Token
+      description: Endpoint for Superadmin to create Users / Admin
       parameters:
       - description: Registration
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/models.AuthRegistrationRequest'
+          $ref: '#/definitions/models.UserCreateRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.AuthRegistrationResponse'
+            $ref: '#/definitions/models.User'
         "400":
           description: Bad Request
           schema:
@@ -296,9 +310,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.HTTPError'
-      summary: Registration
+      summary: Create an Account
       tags:
-      - authentication
+      - user
   /campaign:
     get:
       consumes:
@@ -824,6 +838,31 @@ paths:
           schema:
             $ref: '#/definitions/models.HTTPError'
       summary: Create Transactions for User
+      tags:
+      - transaction
+  /transaction/count:
+    get:
+      consumes:
+      - application/json
+      description: Counts the total records in the db
+      parameters:
+      - description: Bearer eyJhb...
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.HTTPError'
+      summary: Counts the total records in the db
       tags:
       - transaction
   /user:

@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/loyalty-application/go-gin-backend/collections"
-	"github.com/loyalty-application/go-gin-backend/kafka"
+	// "github.com/loyalty-application/go-gin-backend/kafka"
 	"github.com/loyalty-application/go-gin-backend/models"
 )
 
@@ -92,6 +92,26 @@ func (t TransactionController) GetAllTransactions(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, result)
+}
+
+// @Summary Counts the total records in the db
+// @Description Counts the total records in the db
+// @Tags    transaction
+// @Accept  application/json
+// @Produce application/json
+// @Param   Authorization header string true "Bearer eyJhb..."
+// @Success 200 {object} int64
+// @Failure 400 {object} models.HTTPError
+// @Router  /transaction/count [get]
+func (t TransactionController) CountAllTransactions(c *gin.Context) {
+
+	count, err := collections.CountTransactions()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "Failed to count transactions"})
+		return
+	}
+
+	c.JSON(http.StatusOK, count)
 }
 
 // @Summary Retrieve Transactions of User
@@ -180,11 +200,11 @@ func (t TransactionController) PostTransactions(c *gin.Context) {
 		return
 	}
 
-	for _, transaction := range data.Transactions {
-		// index is the index where we are
-		// element is the element from someSlice for where we are
-		kafka.ProduceMessage(transaction)
-	}
+	// for _, transaction := range data.Transactions {
+	// 	// index is the index where we are
+	// 	// element is the element from someSlice for where we are
+	// 	kafka.ProduceMessage(transaction)
+	// }
 
 
 
