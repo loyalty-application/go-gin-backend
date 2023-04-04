@@ -59,7 +59,7 @@ func InitRoutes() {
 	// users
 	userGroup := v1.Group("/user")
 	userGroup.Use(middlewares.AuthMiddleware())
-	
+
 	userGroup.GET("", auth.GetAllUsers)
 	userGroup.GET("/:userId", auth.GetSpecificUser)
 	userGroup.POST("", auth.PostAccount)
@@ -70,6 +70,7 @@ func InitRoutes() {
 	transactionGroup.Use(middlewares.AuthMiddleware())
 
 	transactionGroup.GET("", transaction.GetAllTransactions)
+	transactionGroup.GET("/count", transaction.CountAllTransactions)
 	transactionGroup.GET("/:userId", transaction.GetTransactionsForUser)
 	transactionGroup.PUT("/:transactionId", transaction.UpdateTransaction)
 	transactionGroup.POST("", transaction.PostTransactions)

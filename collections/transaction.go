@@ -36,6 +36,19 @@ func RetrieveAllTransactions(skip int64, slice int64) (transaction []models.Tran
 	return transaction, err
 }
 
+func CountTransactions() (count int64, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	opts := options.Count().SetHint("_id_")
+	count, err = transactionCollection.CountDocuments(ctx, bson.D{}, opts)
+	if err != nil {
+		panic(err)
+	}
+
+	return count, err
+}
+
 func RetrieveAllTransactionsForUser(cardIdList []string, skip int64, slice int64) (transaction []models.Transaction, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

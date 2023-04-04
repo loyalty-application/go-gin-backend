@@ -94,6 +94,26 @@ func (t TransactionController) GetAllTransactions(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// @Summary Counts the total records in the db
+// @Description Counts the total records in the db
+// @Tags    transaction
+// @Accept  application/json
+// @Produce application/json
+// @Param   Authorization header string true "Bearer eyJhb..."
+// @Success 200 {object} int64
+// @Failure 400 {object} models.HTTPError
+// @Router  /transaction/count [get]
+func (t TransactionController) CountAllTransactions(c *gin.Context) {
+
+	count, err := collections.CountTransactions()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.HTTPError{Code: http.StatusInternalServerError, Message: "Failed to count transactions"})
+		return
+	}
+
+	c.JSON(http.StatusOK, count)
+}
+
 // @Summary Retrieve Transactions of User
 // @Description Retrieve transaction records of a user
 // @Tags    transaction

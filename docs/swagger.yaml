@@ -840,6 +840,31 @@ paths:
       summary: Create Transactions for User
       tags:
       - transaction
+  /transaction/count:
+    get:
+      consumes:
+      - application/json
+      description: Counts the total records in the db
+      parameters:
+      - description: Bearer eyJhb...
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.HTTPError'
+      summary: Counts the total records in the db
+      tags:
+      - transaction
   /user:
     get:
       consumes:
