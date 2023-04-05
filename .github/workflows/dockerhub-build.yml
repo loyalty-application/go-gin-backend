@@ -9,8 +9,8 @@ env:
   AWS_REGION: ap-southeast-1 # set this to your preferred AWS region, e.g. us-west-1
   APP_NAME: go-gin-backend
   DOCKERHUB_REPO_TAG: docker.io/loyaltyapplication/go-gin-backend:latest
-  ECS_SERVICE: go-gin-backend-cluster
-  ECS_CLUSTER: go-gin-backend-service
+  ECS_SERVICE: go-gin-backend-service
+  ECS_CLUSTER: go-gin-backend-cluster
 
 jobs:
   docker:
