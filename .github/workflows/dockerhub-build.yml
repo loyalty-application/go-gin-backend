@@ -48,4 +48,4 @@ jobs:
           IMAGE_TAG: latest
         run: |
           # Redeploy ECS
-          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
+          aws ecs update-service --region $AWS_REGION --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
