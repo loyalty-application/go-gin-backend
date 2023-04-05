@@ -1,7 +1,5 @@
 package models
 
-import "time"
-
 type CampaignList struct {
 	Campaigns []Campaign `json:"campaigns" bson:",inline"`
 }
