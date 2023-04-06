@@ -4,6 +4,10 @@ WORKDIR /app
 
 ENV GIN_MODE=release
 
+ENV CGO_ENABLED 1
+
+ENV GOFLAGS -mod=vendor
+
 COPY go.mod ./
 
 COPY go.sum ./
