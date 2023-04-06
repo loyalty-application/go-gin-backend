@@ -5,13 +5,14 @@ import (
 	"log"
 	"math/rand"
 	"time"
+
 	// "github.com/loyalty-application/go-gin-backend/kafka"
+	"github.com/imdario/mergo"
 	"github.com/loyalty-application/go-gin-backend/config"
 	"github.com/loyalty-application/go-gin-backend/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"github.com/imdario/mergo"
 	// "strconv"
 )
 
@@ -22,7 +23,7 @@ func RetrieveAllTransactions(skip int64, slice int64) (transaction []models.Tran
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	opts := options.Find().SetSort(bson.D{{Key: "transaction_date", Value: 1}}).SetLimit(slice).SetSkip(skip)
+	opts := options.Find().SetSort(bson.D{{Key: "transaction_date", Value: -1}}).SetLimit(slice).SetSkip(skip)
 
 	cursor, err := transactionCollection.Find(ctx, bson.D{}, opts)
 	if err != nil {
@@ -53,7 +54,7 @@ func RetrieveAllTransactionsForUser(cardIdList []string, skip int64, slice int64
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	filter := bson.D{{Key: "card_id", Value: bson.M{"$in" : cardIdList}}}
+	filter := bson.D{{Key: "card_id", Value: bson.M{"$in": cardIdList}}}
 	opts := options.Find().SetSort(bson.D{{Key: "transaction_date", Value: 1}}).SetLimit(slice).SetSkip(skip)
 
 	cursor, err := transactionCollection.Find(ctx, filter, opts)
@@ -98,15 +99,15 @@ func CreateTransactions(transactions models.TransactionList) (result interface{}
 	for _, doc := range t {
 		models = append(models, mongo.NewInsertOneModel().SetDocument(doc))
 	}
-	
+
 	// If an error occurs during the processing of one of the write operations, MongoDB
 	// will continue to process remaining write operations in the list.
 	bulkWriteOptions := options.BulkWrite().SetOrdered(false)
 	// log.Println("Bulk Writing", models)
 	result, err = unprocessedCollection.BulkWrite(ctx, models, bulkWriteOptions)
-    if err != nil && !mongo.IsDuplicateKeyError(err) {
-        panic(err)
-    }
+	if err != nil && !mongo.IsDuplicateKeyError(err) {
+		panic(err)
+	}
 
 	return result, err
 }
@@ -129,7 +130,7 @@ func UpdateTransaction(transactionId string, transaction models.Transaction) (re
 	if err != nil {
 		panic(err)
 	}
-	
+
 	if err = mergo.Merge(&initialTransaction, transaction, mergo.WithOverride); err != nil {
 		log.Println(err.Error())
 		panic(err)
@@ -146,7 +147,7 @@ func UpdateTransaction(transactionId string, transaction models.Transaction) (re
 	return result, err
 }
 
-func DeleteTransaction(transactionId string) (result *mongo.UpdateResult, err error){
+func DeleteTransaction(transactionId string) (result *mongo.UpdateResult, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -169,19 +170,19 @@ func UpdateCardPointsFromTransactions(card models.Card) (result models.Card, err
 	pipeline := []bson.M{
 		{"$match": bson.M{"card_id": card.CardId}},
 		{"$group": bson.M{
-			"_id": nil,
-			"totalPoints": bson.M{"$sum": "$points"},
-			"totalMiles": bson.M{"$sum": "$miles"},
+			"_id":           nil,
+			"totalPoints":   bson.M{"$sum": "$points"},
+			"totalMiles":    bson.M{"$sum": "$miles"},
 			"totalCashback": bson.M{"$sum": "$cashback"},
 		}},
 	}
-	
+
 	cursor, err := transactionCollection.Aggregate(ctx, pipeline)
 	if err != nil {
 		log.Println(err.Error())
 		return result, err
 	}
-	
+
 	var temp struct {
 		TotalPoints   float64 `bson:"totalPoints"`
 		TotalMiles    float64 `bson:"totalMiles"`
@@ -189,7 +190,7 @@ func UpdateCardPointsFromTransactions(card models.Card) (result models.Card, err
 	}
 
 	if cursor.Next(context.Background()) {
-        
+
 		if err = cursor.Decode(&temp); err != nil {
 			log.Println(err.Error())
 			return result, err
