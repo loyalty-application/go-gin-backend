@@ -52,6 +52,7 @@ func ProduceMessage(t models.Transaction) {
 
 	key := t.CardId
 	data, _ := json.Marshal(t)
+	fmt.Println("producing message")
 
 	delivery_chan := make(chan kafka.Event, 10000)
 	p.Produce(&kafka.Message{
@@ -74,5 +75,5 @@ func ProduceMessage(t models.Transaction) {
 	}()
 
 	// Wait for all messages to be delivered
-	// p.Flush(15 * 1000)
+	p.Flush(10 * 1000)
 }
