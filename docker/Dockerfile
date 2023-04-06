@@ -14,6 +14,8 @@ COPY go.sum ./
 
 RUN go mod download
 
+RUN go mod vendor
+
 COPY . ./
 
 #RUN wget -O - https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem > ./rds-combined-ca-bundle.pem
