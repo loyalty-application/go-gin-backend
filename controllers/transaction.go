@@ -1,13 +1,13 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
-	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/loyalty-application/go-gin-backend/collections"
-	"github.com/loyalty-application/go-gin-backend/kafka"
+	"github.com/loyalty-application/go-gin-backend/kafkalocal"
 	"github.com/loyalty-application/go-gin-backend/models"
 )
 
@@ -203,7 +203,7 @@ func (t TransactionController) PostTransactions(c *gin.Context) {
 	for _, transaction := range data.Transactions {
 		// index is the index where we are
 		// element is the element from someSlice for where we are
-		kafka.ProduceMessage(transaction)
+		kafkalocal.ProduceMessage(transaction)
 	}
 
 	c.JSON(http.StatusCreated, result)
