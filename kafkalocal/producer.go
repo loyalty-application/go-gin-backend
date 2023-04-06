@@ -53,6 +53,7 @@ func ProduceMessage(t models.Transaction) {
 	key := t.CardId
 	data, _ := json.Marshal(t)
 	fmt.Println("producing message")
+	fmt.Println("producing to" + topic)
 
 	delivery_chan := make(chan kafka.Event, 10000)
 	p.Produce(&kafka.Message{
@@ -60,14 +61,20 @@ func ProduceMessage(t models.Transaction) {
 		Key:            []byte(key),
 		Value:          data,
 	}, delivery_chan)
-	e := <-delivery_chan
-	m := e.(*kafka.Message)
+	go func() {
+		for e := range p.Events() {
+			switch ev := e.(type) {
+			case *kafka.Message:
+				if ev.TopicPartition.Error != nil {
+					fmt.Printf("Failed to deliver message: %v\n", ev.TopicPartition)
+				} else {
+					fmt.Printf("Produced event to topic %s: key = %-10s value = %s\n",
+						*ev.TopicPartition.Topic, string(ev.Key), string(ev.Value))
+				}
+			}
+		}
+	}()
 
-	if m.TopicPartition.Error != nil {
-		fmt.Printf("Delivery failed: %v\n", m.TopicPartition.Error)
-	} else {
-		fmt.Printf("Delivered message to topic %s [%d] at offset %v\n",
-			*m.TopicPartition.Topic, m.TopicPartition.Partition, m.TopicPartition.Offset)
-	}
-	close(delivery_chan)
+	// Wait for all messages to be delivered
+	// p.Flush(15 * 1000)
 }
