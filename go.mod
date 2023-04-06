@@ -46,6 +46,7 @@ require (
 )
 
 require (
+	github.com/confluentinc/confluent-kafka-go v1.9.2
 	github.com/gin-gonic/gin v1.9.0
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/golang/snappy v0.0.4 // indirect
